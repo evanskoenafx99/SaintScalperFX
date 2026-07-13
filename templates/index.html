@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SaintScalperFX AI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📈 SaintScalperFX AI</h1>
+
+<h2>👋 Welcome back, {{ username }}!</h2>
+
+<p class="subtitle">
+Your AI trading assistant is ready.
+</p>
+
+
+<div class="card">
+
+<h2>🤖 AI Status</h2>
+
+<p>🟢 Online</p>
+
+</div>
+
+
+<div class="card">
+
+<h2>📊 Dashboard</h2>
+
+<div class="card">
+
+<h2>📊 Trading Activity</h2>
+<div class="card">
+
+<h2>📈 Signal Statistics</h2>
+
+<p>
+🟢 BUY Signals:
+{{ buy_count }}
+</p>
+
+<p>
+🔴 SELL Signals:
+{{ sell_count }}
+</p>
+
+<p>
+⚪ WAIT Signals:
+{{ wait_count }}
+</p>
+
+<p>
+⭐ Most Common Signal:
+{{ most_common }}
+</p>
+
+</div>
+<p>
+Total Analyses:
+{{ total }}
+</p>
+
+<p>
+Latest Signal:
+{{ last_signal }}
+</p>
+
+<p>
+Last Analysis:
+{{ last_date }}
+</p>
+
+
+
+<div class="card">
+
+<h2>📤 Upload Chart</h2>
+
+<form action="/upload" method="POST" enctype="multipart/form-data">
+
+<input type="file" name="image" required>
+
+<br><br>
+
+<button type="submit">
+🚀 Analyze Chart
+</button>
+
+</form>
+
+</div>
+
+
+<br>
+
+<a href="/history">
+<button>
+📜 View History
+</button>
+</a>
+
+<br><br>
+<br><br>
+
+<a href="/settings">
+<button>
+⚙️ Trading Settings
+</button>
+
+<br><br>
+
+
+
+<a href="/risk">
+<button>
+🧮 Risk Calculator
+</button>
+</a>
+
+
+
+</a>
+<a href="/logout">
+<button>
+🚪 Logout
+</button>
+</a>
+
+</div>
+
+</body>
+</html>

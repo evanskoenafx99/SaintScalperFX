@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SaintScalperFX AI</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📈 SaintScalperFX AI</h1>
+
+<p class="subtitle">Professional Chart Analysis</p>
+
+<div class="card">
+<h2>📊 Analysis Complete</h2>
+
+<p><strong>📈 Signal:</strong> {{ signal }}</p>
+<p><strong>🎯 Confidence:</strong> {{ confidence }}</p>
+<p><strong>📉 Trend:</strong> {{ trend }}</p>
+<p><strong>📝 Reason:</strong> {{ reason }}</p>
+</div>
+
+<div class="card">
+<h2>📋 Trade Plan</h2>
+
+<p><strong>🎯 Entry:</strong> {{ entry }}</p>
+<p><strong>🛑 Stop Loss:</strong> {{ stop_loss }}</p>
+<p><strong>💰 Take Profit:</strong> {{ take_profit }}</p>
+</div>
+
+<div class="card">
+<h2>📷 Uploaded Chart</h2>
+
+<img src="/uploads/{{ image }}" width="100%" style="border-radius:10px;">
+</div>
+
+<a href="/">
+<button>🔄 Analyze Another Chart</button>
+</a>
+
+</div>
+
+</body>
+</html>

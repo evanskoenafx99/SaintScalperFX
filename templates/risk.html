@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Risk Calculator - SaintScalperFX</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+
+
+<body>
+
+<div class="container">
+
+<h1>🧮 AI Risk Calculator</h1>
+
+
+<form method="POST">
+
+<p>Account Balance</p>
+
+<input type="number" name="balance" required>
+
+
+<p>Risk Percentage</p>
+
+<input type="number" name="risk" step="0.1" required>
+
+
+<p>Stop Loss (pips)</p>
+
+<input type="number" name="pips" required>
+
+
+<br><br>
+
+<button type="submit">
+Calculate Risk
+</button>
+
+</form>
+
+
+
+{% if result %}
+
+<div class="card">
+
+<h2>📊 Result</h2>
+
+<p>{{ result }}</p>
+
+</div>
+
+{% endif %}
+
+
+<br>
+
+<a href="/">
+<button>
+⬅ Dashboard
+</button>
+</a>
+
+
+</div>
+
+</body>
+
+</html>

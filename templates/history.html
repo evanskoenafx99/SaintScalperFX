@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Analysis History - SaintScalperFX</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📊 Analysis History</h1>
+
+<p>Your previous AI chart analyses</p>
+
+
+{% if history|length == 0 %}
+
+{% if item["image"] %}
+
+<img src="/uploads/{{ item['image'] }}" width="300">
+
+<br><br>
+
+{% endif %}
+
+{% endif %}
+
+
+
+{% for item in history %}
+
+<div class="card">
+{% if item["image"] %}
+
+<img src="{{ url_for('uploaded_file', filename=item['image']) }}"
+style="width:300px; border-radius:10px;">
+
+<br><br>
+
+{% endif %}
+{% if item["signal"] == "BUY" %}
+
+<h2>🟢 BUY</h2>
+
+{% elif item["signal"] == "SELL" %}
+
+<h2>🔴 SELL</h2>
+
+{% else %}
+
+<h2>⚪ WAIT</h2>
+
+{% endif %}
+
+
+<p>
+📈 Trend:
+{{ item["trend"] }}
+</p>
+
+
+<p>
+🎯 Confidence:
+{{ item["confidence"] }}
+</p>
+
+
+<p>
+📝 Reason:
+{{ item["reason"] }}
+</p>
+
+
+<p>
+🎯 Entry:
+{{ item["entry"] }}
+</p>
+
+
+<p>
+🛑 Stop Loss:
+{{ item["stop_loss"] }}
+</p>
+
+
+<p>
+💰 Take Profit:
+{{ item["take_profit"] }}
+</p>
+
+
+<p>
+📅 {{ item["created_at"] }}
+</p>
+
+
+</div>
+
+{% endfor %}
+
+
+
+<a href="/">
+<button>
+⬅ Dashboard
+</button>
+</a>
+
+
+</div>
+
+</body>
+
+</html>
