@@ -320,8 +320,11 @@ candle_bias=result["candle_bias"],
 bullish_candles=result["bullish_candles"],
 bearish_candles=result["bearish_candles"],
 pattern=result["pattern"],
-momentum=result["momentum"]
+momentum=result["momentum"],
+levels=result["levels"],
+trade_plan=result["trade_plan"]
 )
+
 
 
 

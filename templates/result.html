@@ -1,18 +1,29 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>SaintScalperFX Result</title>
+
 <link rel="stylesheet" href="/static/style.css">
+
 </head>
+
 
 <body>
 
 <div class="container">
 
+
 <h1>🧠 SaintScalperFX AI</h1>
-<p class="subtitle">Professional Multi-Engine Analysis</p>
+
+<p class="subtitle">
+Professional Multi-Engine Analysis
+</p>
+
+
 
 <div class="card">
 
@@ -20,9 +31,11 @@
 {{ signal }}
 </h1>
 
+
 <h2 style="text-align:center;">
 🎯 Confidence: {{ confidence }}
 </h2>
+
 
 <h3 style="text-align:center;">
 📊 Market Bias: {{ trend }}
@@ -30,11 +43,15 @@
 
 </div>
 
+
+
+
 <div class="card">
 
 <h2>📋 AI Analysis</h2>
 
 <p>{{ reason }}</p>
+
 
 <table class="summary-table">
 
@@ -43,63 +60,66 @@
 <td>{{ grade }}</td>
 </tr>
 
+
 <tr>
 <td>BUY Score</td>
 <td>{{ buy_score }}</td>
 </tr>
+
 
 <tr>
 <td>SELL Score</td>
 <td>{{ sell_score }}</td>
 </tr>
 
+
 </table>
 
 </div>
+
+
+
 
 <div class="card">
 
 <h2>🕯 Candle Pattern Analysis</h2>
 
-<table class="summary-table">
 
-<tr>
-<td>Candles Detected</td>
-<td>{{ candle_count }}</td>
-</tr>
+<p>
+<strong>Pattern:</strong> {{ pattern }}
+</p>
 
-<tr>
-<td>Market Bias</td>
-<td>{{ candle_bias }}</td>
-</tr>
 
-<tr>
-<td>Bullish Candles</td>
-<td>{{ bullish_candles }}</td>
-</tr>
+<p>
+<strong>Momentum:</strong> {{ momentum }}
+</p>
 
-<tr>
-<td>Bearish Candles</td>
-<td>{{ bearish_candles }}</td>
-</tr>
 
-<tr>
-<td>Pattern</td>
-<td>{{ pattern }}</td>
-</tr>
+<p>
+<strong>Bullish Candles:</strong> {{ bullish_candles }}
+</p>
 
-<tr>
-<td>Momentum</td>
-<td>{{ momentum }}</td>
-</tr>
 
-</table>
+<p>
+<strong>Bearish Candles:</strong> {{ bearish_candles }}
+</p>
+
+
+<p>
+<strong>Total Candles:</strong> {{ candle_count }}
+</p>
+
 
 </div>
+
+
+
+
 
 <div class="card">
 
 <h2>🧠 AI Confidence Report</h2>
+
 
 <table class="summary-table">
 
@@ -110,6 +130,8 @@
 <th>Confidence</th>
 <th>Reason</th>
 </tr>
+
+
 {% for engine in engines %}
 
 <tr>
@@ -128,48 +150,77 @@
 
 {% endfor %}
 
-</table>
 
-<br>
-
-<table class="summary-table">
-
-<tr>
-<td><strong>BUY SCORE</strong></td>
-<td>{{ buy_score }}</td>
-</tr>
-
-<tr>
-<td><strong>SELL SCORE</strong></td>
-<td>{{ sell_score }}</td>
-</tr>
-
-<tr>
-<td><strong>AI GRADE</strong></td>
-<td>{{ grade }}</td>
-</tr>
-
-<tr>
-<td><strong>FINAL SIGNAL</strong></td>
-<td>{{ signal }}</td>
-</tr>
-
-</table>
 </table>
 
 </div>
+
+
+
+
+
 
 <div class="card">
 
 <h2>📈 Trade Plan</h2>
 
-<p><strong>🎯 Entry:</strong> {{ entry }}</p>
 
-<p><strong>🛑 Stop Loss:</strong> {{ stop_loss }}</p>
+<p>
+<strong>🎯 Entry:</strong> {{ entry }}
+</p>
 
-<p><strong>💰 Take Profit:</strong> {{ take_profit }}</p>
+
+<p>
+<strong>🛑 Stop Loss:</strong> {{ stop_loss }}
+</p>
+
+
+<p>
+<strong>💰 Take Profit:</strong> {{ take_profit }}
+</p>
+
+
+
+<h3>⭐ Setup Quality</h3>
+
+<p>
+{{ trade_plan.setup_quality }}/100
+</p>
+
+
+
+<h3>📊 Support Zones</h3>
+
+{% for zone in levels.support %}
+
+<p>
+🟢 {{ zone.start }} - {{ zone.end }}
+| {{ zone.strength }}
+| Touches: {{ zone.touches }}
+</p>
+
+{% endfor %}
+
+
+
+<h3>📉 Resistance Zones</h3>
+
+{% for zone in levels.resistance %}
+
+<p>
+🔴 {{ zone.start }} - {{ zone.end }}
+| {{ zone.strength }}
+| Touches: {{ zone.touches }}
+</p>
+
+{% endfor %}
+
 
 </div>
+
+
+
+
 
 <div class="card">
 
@@ -179,7 +230,12 @@
 
 </div>
 
+
+
+
+
 <br>
+
 
 <a href="/">
 <button>
@@ -187,7 +243,10 @@
 </button>
 </a>
 
+
+
 </div>
 
 </body>
+
 </html>
