@@ -18,28 +18,24 @@ def detect_levels(image_path):
 
         x = int((candle["start"] + candle["end"]) / 2)
 
-        highs = []
-        lows = []
+        candle_pixels = []
 
 
         for y in range(int(height * 0.15), int(height * 0.75)):
 
             r, g, b = img.getpixel((x, y))
 
-            if r < 80 and g < 80 and b < 80:
-                continue
-
             if r > 100 or g > 100 or b > 100:
-                highs.append(y)
+                candle_pixels.append(y)
 
 
-        if highs:
+        if candle_pixels:
 
-            top = min(highs)
-            bottom = max(highs)
+            high = min(candle_pixels)
+            low = max(candle_pixels)
 
-            resistances.append(top)
-            supports.append(bottom)
+            resistances.append(high)
+            supports.append(low)
 
 
 
@@ -47,11 +43,11 @@ def detect_levels(image_path):
 
         zones = []
 
-        values.sort()
-
         if not values:
             return zones
 
+
+        values.sort()
 
         start = values[0]
         end = values[0]
@@ -61,6 +57,7 @@ def detect_levels(image_path):
         for value in values[1:]:
 
             if value <= end + 15:
+
                 end = value
                 touches += 1
 
@@ -88,10 +85,6 @@ def detect_levels(image_path):
 
 
 
-    support_zones = build_zones(supports)
-    resistance_zones = build_zones(resistances)
-
-
     def rank_zones(zones):
 
         for zone in zones:
@@ -111,54 +104,20 @@ def detect_levels(image_path):
             reverse=True
         )
 
-        return zones[:3]
-
-
-
-    support_zones = build_zones(supports)
-    resistance_zones = build_zones(resistances)
-
-
-    def rank_zones(zones):
-
-        for zone in zones:
-
-            if zone["touches"] >= 10:
-                zone["strength"] = "STRONG"
-
-            elif zone["touches"] >= 4:
-                zone["strength"] = "MEDIUM"
-
-            else:
-                zone["strength"] = "WEAK"
-
-
-        zones.sort(
-            key=lambda x: x["touches"],
-            reverse=True
-        )
 
         return zones[:3]
 
 
-    support_zones = rank_zones(support_zones)
-    resistance_zones = rank_zones(resistance_zones)
 
-    cleaned_resistance = []
+    support_zones = rank_zones(
+        build_zones(supports)
+    )
 
-    for resistance in resistance_zones:
+    resistance_zones = rank_zones(
+        build_zones(resistances)
+    )
 
-        overlap = False
 
-        for support in support_zones:
-
-            if abs(resistance["start"] - support["start"]) < 10:
-                overlap = True
-
-        if not overlap:
-            cleaned_resistance.append(resistance)
-
-    resistance_zones = cleaned_resistance
 
     return {
         "support": support_zones,
