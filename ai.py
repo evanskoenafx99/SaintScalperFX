@@ -3,6 +3,7 @@ from engine.vision import analyze as vision_analyze
 from engine.candle_shapes import detect
 from engine.pattern_detector import analyze as pattern_analyze
 from engine.levels import detect_levels
+from engine.trade_plan import generate_trade_plan
 
 
 def analyze_chart(filepath):
@@ -54,6 +55,13 @@ def analyze_chart(filepath):
         grade = "C"
 
 
+    trade_plan = generate_trade_plan(
+        signal,
+        pattern["pattern"],
+        pattern["momentum"],
+        levels
+    )
+
 
     return {
 
@@ -65,12 +73,11 @@ def analyze_chart(filepath):
 
         "reason": reason,
 
+        "entry": trade_plan["entry"],
 
-        "entry": "Wait for confirmation candle",
+        "stop_loss": trade_plan["stop_loss"],
 
-        "stop_loss": "Use recent support/resistance",
-
-        "take_profit": "Minimum Risk : Reward 1:3",
+        "take_profit": trade_plan["take_profit"],
 
 
         "grade": grade,
@@ -84,9 +91,7 @@ def analyze_chart(filepath):
 
         "vision": vision,
 
-
-
-            "candles_detected": len(candles),
+        "candles_detected": len(candles),
 
         "candle_count": len(candles),
 
@@ -96,9 +101,12 @@ def analyze_chart(filepath):
 
         "bearish_candles": pattern["bearish_candles"],
 
+
         "pattern": pattern["pattern"],
 
         "momentum": pattern["momentum"],
 
-        "levels": levels
-}
+        "levels": levels,
+
+        "trade_plan": trade_plan
+    }
