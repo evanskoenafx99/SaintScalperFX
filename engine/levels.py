@@ -144,6 +144,21 @@ def detect_levels(image_path):
     support_zones = rank_zones(support_zones)
     resistance_zones = rank_zones(resistance_zones)
 
+    cleaned_resistance = []
+
+    for resistance in resistance_zones:
+
+        overlap = False
+
+        for support in support_zones:
+
+            if abs(resistance["start"] - support["start"]) < 10:
+                overlap = True
+
+        if not overlap:
+            cleaned_resistance.append(resistance)
+
+    resistance_zones = cleaned_resistance
 
     return {
         "support": support_zones,
