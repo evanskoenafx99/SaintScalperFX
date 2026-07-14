@@ -131,3 +131,56 @@ button:hover{
 h1,h2,h3{
     margin-top:0;
 }
+.auth-container{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.auth-card{
+    width:100%;
+    max-width:450px;
+}
+
+.logo{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.logo h1{
+    font-size:36px;
+}
+
+.logo p{
+    color:#94a3b8;
+}
+
+.card label{
+    display:block;
+    margin-bottom:8px;
+    color:#cbd5e1;
+}
+
+.card input{
+    width:100%;
+    box-sizing:border-box;
+    padding:14px;
+    margin-bottom:15px;
+    background:#0f172a;
+    border:1px solid #334155;
+    border-radius:10px;
+    color:white;
+    font-size:16px;
+}
+
+.card input:focus{
+    outline:none;
+    border-color:#2563eb;
+}
+
+.card a{
+    color:#60a5fa;
+    text-decoration:none;
+}
