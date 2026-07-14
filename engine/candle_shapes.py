@@ -30,20 +30,16 @@ def detect(filepath):
 
             r, g, b = pixels[x, y]
 
-
             if r > 150 and g < 120 and b < 120:
                 count += 1
                 bearish_pixels += 1
-
 
             elif g > r and g > b:
                 count += 1
                 bullish_pixels += 1
 
-
         if count > 2:
             active.append(x)
-
 
 
     zones = []
@@ -61,9 +57,7 @@ def detect(filepath):
 
             previous = x
 
-
         zones.append((start, previous))
-
 
 
     candles = []
@@ -72,7 +66,6 @@ def detect(filepath):
     for start, end in zones:
 
         width = end - start
-
 
         parts = 1
 
@@ -102,10 +95,8 @@ def detect(filepath):
                         if r > 150 and g < 120 and b < 120:
                             red += 1
 
-
                         elif g > r and g > b:
                             green += 1
-
 
 
                 if red > green:
@@ -118,39 +109,76 @@ def detect(filepath):
                     direction = "UNKNOWN"
 
 
-
-                if (candle_end - candle_start) >= 15:
+                if candle_end - candle_start >= 15:
                     strength = "STRONG"
 
                 else:
                     strength = "NORMAL"
 
 
+                # Temporary OHLC conversion layer
+                index = len(candles) + 1
+
+                if direction == "BULLISH":
+
+                    candle_open = 100 + index
+                    candle_close = candle_open + 1
+                    candle_high = candle_close + 0.5
+                    candle_low = candle_open - 0.5
+
+                elif direction == "BEARISH":
+
+                    candle_open = 100 + index
+                    candle_close = candle_open - 1
+                    candle_high = candle_open + 0.5
+                    candle_low = candle_close - 0.5
+
+                else:
+
+                    candle_open = 100 + index
+                    candle_close = candle_open
+                    candle_high = candle_open + 0.2
+                    candle_low = candle_open - 0.2
+
 
                 candles.append({
+
+                    "open": candle_open,
+                    "high": candle_high,
+                    "low": candle_low,
+                    "close": candle_close,
+                    "volume": 100,
+
                     "start": candle_start,
                     "end": candle_end,
+
                     "direction": direction,
                     "strength": strength
+
                 })
 
 
-
     if bullish_pixels > bearish_pixels:
+
         bias = "BULLISH"
 
     elif bearish_pixels > bullish_pixels:
+
         bias = "BEARISH"
 
     else:
+
         bias = "NEUTRAL"
 
 
-
     return {
+
         "candles_found": len(candles),
         "bias": bias,
+
         "bullish_pixels": bullish_pixels,
         "bearish_pixels": bearish_pixels,
+
         "candles": candles[:50]
+
     }
