@@ -286,18 +286,21 @@ def upload():
     conn.close()
 
 
-
     return render_template(
-        "result.html",
-        signal=result["signal"],
-        trend=result["trend"],
-        confidence=result["confidence"],
-        reason=result["reason"],
-        entry=result["entry"],
-        stop_loss=result["stop_loss"],
-        take_profit=result["take_profit"],
-        image=image.filename
-    )
+    "result.html",
+    signal=result["signal"],
+    trend=result["trend"],
+    confidence=result["confidence"],
+    reason=result["reason"],
+    entry=result["entry"],
+    stop_loss=result["stop_loss"],
+    take_profit=result["take_profit"],
+    image=image.filename,
+    grade=result["grade"],
+    buy_score=result["buy_score"],
+    sell_score=result["sell_score"],
+    engines=result["engines"]
+)
 
 
 

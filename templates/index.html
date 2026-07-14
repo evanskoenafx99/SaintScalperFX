@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>SaintScalperFX AI</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaintScalperFX Dashboard</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 
@@ -9,76 +11,104 @@
 
 <div class="container">
 
-<h1>📈 SaintScalperFX AI</h1>
+<div class="topbar">
+    <div>
+        <h1>🧠 SaintScalperFX AI</h1>
+        <p class="subtitle">Professional Multi-Engine Trading Platform</p>
+    </div>
 
-<h2>👋 Welcome back, {{ username }}!</h2>
+    <div class="userbox">
+        <h3>{{ username }}</h3>
+        <p>FREE PLAN</p>
+    </div>
+</div>
 
-<p class="subtitle">
-Your AI trading assistant is ready.
-</p>
+<div class="stats">
 
+<div class="stat-card buy">
+<h2>📈 BUY</h2>
+<h1>{{ buy_count }}</h1>
+</div>
 
-<div class="card">
+<div class="stat-card sell">
+<h2>📉 SELL</h2>
+<h1>{{ sell_count }}</h1>
+</div>
 
-<h2>🤖 AI Status</h2>
+<div class="stat-card wait">
+<h2>⏳ WAIT</h2>
+<h1>{{ wait_count }}</h1>
+</div>
 
-<p>🟢 Online</p>
+<div class="stat-card total">
+<h2>📊 TOTAL</h2>
+<h1>{{ total }}</h1>
+</div>
 
 </div>
 
-
 <div class="card">
 
-<h2>📊 Dashboard</h2>
+<h2>🧠 AI Brain Status</h2>
 
-<div class="card">
+<table class="summary-table">
 
-<h2>📊 Trading Activity</h2>
-<div class="card">
+<tr>
+<td>Brain Status</td>
+<td>🟢 ONLINE</td>
+</tr>
 
-<h2>📈 Signal Statistics</h2>
+<tr>
+<td>Trend Engine</td>
+<td>✅ ACTIVE</td>
+</tr>
 
-<p>
-🟢 BUY Signals:
-{{ buy_count }}
-</p>
+<tr>
+<td>Structure Engine</td>
+<td>✅ ACTIVE</td>
+</tr>
 
-<p>
-🔴 SELL Signals:
-{{ sell_count }}
-</p>
+<tr>
+<td>Liquidity Engine</td>
+<td>✅ ACTIVE</td>
+</tr>
 
-<p>
-⚪ WAIT Signals:
-{{ wait_count }}
-</p>
+<tr>
+<td>FVG Engine</td>
+<td>✅ ACTIVE</td>
+</tr>
 
-<p>
-⭐ Most Common Signal:
-{{ most_common }}
-</p>
+<tr>
+<td>Order Block Engine</td>
+<td>✅ ACTIVE</td>
+</tr>
 
+<tr>
+<td>ICT Engine</td>
+<td>✅ ACTIVE</td>
+</tr>
+
+<tr>
+<td>SMC Engine</td>
+<td>✅ ACTIVE</td>
+</tr>
+
+<tr>
+<td>Latest Signal</td>
+<td>{{ last_signal }}</td>
+</tr>
+
+<tr>
+<td>Most Common Signal</td>
+<td>{{ most_common }}</td>
+</tr>
+
+</table>
 </div>
-<p>
-Total Analyses:
-{{ total }}
-</p>
-
-<p>
-Latest Signal:
-{{ last_signal }}
-</p>
-
-<p>
-Last Analysis:
-{{ last_date }}
-</p>
-
-
 
 <div class="card">
 
-<h2>📤 Upload Chart</h2>
+<h2>📤 Upload Trading Chart</h2>
 
 <form action="/upload" method="POST" enctype="multipart/form-data">
 
@@ -92,43 +122,79 @@ Last Analysis:
 
 </form>
 
-</div>
+</div><div class="card">
 
+<h2>⚡ Quick Actions</h2>
 
-<br>
+<div class="actions">
 
 <a href="/history">
-<button>
-📜 View History
+<button class="action-btn">
+📜 Analysis History
 </button>
 </a>
 
-<br><br>
-<br><br>
-
-<a href="/settings">
-<button>
-⚙️ Trading Settings
-</button>
-
-<br><br>
-
-
-
 <a href="/risk">
-<button>
+<button class="action-btn">
 🧮 Risk Calculator
 </button>
 </a>
 
-
-
+<a href="/settings">
+<button class="action-btn">
+⚙️ Settings
+</button>
 </a>
+
 <a href="/logout">
-<button>
+<button class="action-btn logout">
 🚪 Logout
 </button>
 </a>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>📈 Trading Summary</h2>
+
+<table class="summary-table">
+
+<tr>
+<td>Total Analyses</td>
+<td>{{ total }}</td>
+</tr>
+
+<tr>
+<td>BUY Signals</td>
+<td>{{ buy_count }}</td>
+</tr>
+
+<tr>
+<td>SELL Signals</td>
+<td>{{ sell_count }}</td>
+</tr>
+
+<tr>
+<td>WAIT Signals</td>
+<td>{{ wait_count }}</td>
+</tr>
+
+<tr>
+<td>Most Common Signal</td>
+<td>{{ most_common }}</td>
+</tr>
+
+<tr>
+<td>Latest Signal</td>
+<td>{{ last_signal }}</td>
+</tr>
+
+</table>
+
+</div>
 
 </div>
 
