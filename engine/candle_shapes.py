@@ -31,13 +31,11 @@ def detect(filepath):
             r, g, b = pixels[x, y]
 
 
-            # Bearish candle colour
             if r > 150 and g < 120 and b < 120:
                 count += 1
                 bearish_pixels += 1
 
 
-            # Bullish dark green candle colour
             elif g > r and g > b:
                 count += 1
                 bullish_pixels += 1
@@ -48,9 +46,8 @@ def detect(filepath):
 
 
 
-    # Group active columns
-
     zones = []
+
 
     if active:
 
@@ -86,7 +83,6 @@ def detect(filepath):
         width = end - start
 
 
-        # Split large zones
         if width > 25:
 
             parts = max(1, width // 10)
@@ -96,9 +92,8 @@ def detect(filepath):
 
             for i in range(parts):
 
-                candle_start = int(start + (i * step))
-                candle_end = int(start + ((i + 1) * step))
-
+                candle_start = int(start + i * step)
+                candle_end = int(start + (i + 1) * step)
 
                 candles.append(
                     {
@@ -121,6 +116,18 @@ def detect(filepath):
 
 
 
+    # Add simple candle strength analysis
+
+    for candle in candles:
+
+        if candle["width"] >= 15:
+            candle["strength"] = "STRONG"
+
+        else:
+            candle["strength"] = "NORMAL"
+
+
+
     if bullish_pixels > bearish_pixels:
         bias = "BULLISH"
 
@@ -134,8 +141,8 @@ def detect(filepath):
 
     return {
         "candles_found": len(candles),
+        "bias": bias,
         "bullish_pixels": bullish_pixels,
         "bearish_pixels": bearish_pixels,
-        "bias": bias,
         "candles": candles[:50]
     }
