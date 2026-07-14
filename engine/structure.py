@@ -1,6 +1,6 @@
 def analyze(candles):
 
-    if len(candles) < 4:
+    if len(candles) < 6:
         return {
             "engine": "Structure",
             "signal": "WAIT",
@@ -9,49 +9,75 @@ def analyze(candles):
             "reason": "Not enough candles."
         }
 
-    h1 = candles[-4]["high"]
-    h2 = candles[-3]["high"]
-    h3 = candles[-2]["high"]
-    h4 = candles[-1]["high"]
 
-    l1 = candles[-4]["low"]
-    l2 = candles[-3]["low"]
-    l3 = candles[-2]["low"]
-    l4 = candles[-1]["low"]
+    highs = [c["high"] for c in candles[-6:]]
+    lows = [c["low"] for c in candles[-6:]]
 
-    bullish = h4 > h3 and l4 > l3
-    bearish = h4 < h3 and l4 < l3
 
-    if bullish:
+    previous_high = max(highs[:-1])
+    previous_low = min(lows[:-1])
+
+    current = candles[-1]
+
+
+    bullish_bos = current["high"] > previous_high
+    bearish_bos = current["low"] < previous_low
+
+
+    previous_direction = None
+
+    if highs[-2] > highs[-3] and lows[-2] > lows[-3]:
+        previous_direction = "BULLISH"
+
+    elif highs[-2] < highs[-3] and lows[-2] < lows[-3]:
+        previous_direction = "BEARISH"
+
+
+    choch = False
+
+
+    if previous_direction == "BULLISH" and bearish_bos:
+        choch = True
+
+    if previous_direction == "BEARISH" and bullish_bos:
+        choch = True
+
+
+
+    if bullish_bos:
+
         return {
             "engine": "Structure",
             "signal": "BUY",
-            "score": 20,
+            "score": 25,
             "confidence": 95,
-            "reason": "Higher High and Higher Low detected.",
+            "reason": "Bullish BOS detected.",
             "structure": "Bullish",
             "bos": True,
-            "choch": False
+            "choch": choch
         }
 
-    if bearish:
+
+    if bearish_bos:
+
         return {
             "engine": "Structure",
             "signal": "SELL",
-            "score": 20,
+            "score": 25,
             "confidence": 95,
-            "reason": "Lower High and Lower Low detected.",
+            "reason": "Bearish BOS detected.",
             "structure": "Bearish",
             "bos": True,
-            "choch": False
+            "choch": choch
         }
+
 
     return {
         "engine": "Structure",
         "signal": "WAIT",
         "score": 10,
         "confidence": 50,
-        "reason": "No clear market structure.",
+        "reason": "No BOS or CHoCH detected.",
         "structure": "Sideways",
         "bos": False,
         "choch": False
