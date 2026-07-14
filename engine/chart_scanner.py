@@ -19,37 +19,39 @@ def scan(filepath):
 
         active_columns = []
 
-        bullish = 0
-        bearish = 0
+        bullish_pixels = 0
+        bearish_pixels = 0
 
 
         for x in range(chart.size[0]):
 
-            column_activity = 0
+            activity = 0
 
             for y in range(chart.size[1]):
 
                 r, g, b = pixels[x, y][:3]
 
 
+                # bullish candle colour
                 if g > r * 1.15 and g > b * 1.05:
-                    bullish += 1
-                    column_activity += 1
+                    bullish_pixels += 1
+                    activity += 1
 
 
+                # bearish candle colour
                 elif r > g * 1.15 and r > b * 1.10:
-                    bearish += 1
-                    column_activity += 1
+                    bearish_pixels += 1
+                    activity += 1
 
 
-            if column_activity > 8:
+            if activity > 8:
                 active_columns.append(x)
 
 
 
-        # Group nearby columns into candle zones
+        # Group columns
 
-        candles = []
+        raw_zones = []
 
         if active_columns:
 
@@ -60,11 +62,9 @@ def scan(filepath):
             for x in active_columns[1:]:
 
                 if x - previous > 5:
-                    candles.append(
-                        {
-                            "start": start,
-                            "end": previous
-                        }
+
+                    raw_zones.append(
+                        (start, previous)
                     )
 
                     start = x
@@ -73,18 +73,37 @@ def scan(filepath):
                 previous = x
 
 
-            candles.append(
-                {
-                    "start": start,
-                    "end": previous
-                }
+            raw_zones.append(
+                (start, previous)
             )
 
 
-        if bullish > bearish:
+
+        # Remove unrealistic zones
+
+        candles = []
+
+        for start, end in raw_zones:
+
+            width = end - start
+
+            # keep candle-like widths
+            if 3 <= width <= 25:
+
+                candles.append(
+                    {
+                        "start": start,
+                        "end": end,
+                        "width": width
+                    }
+                )
+
+
+
+        if bullish_pixels > bearish_pixels:
             trend = "BULLISH"
 
-        elif bearish > bullish:
+        elif bearish_pixels > bullish_pixels:
             trend = "BEARISH"
 
         else:
@@ -95,10 +114,10 @@ def scan(filepath):
         return {
             "status": "SCANNED",
             "candles_detected": len(candles),
-            "bullish_pixels": bullish,
-            "bearish_pixels": bearish,
+            "bullish_pixels": bullish_pixels,
+            "bearish_pixels": bearish_pixels,
             "trend": trend,
-            "candle_zones": candles[:10]
+            "candles": candles[:20]
         }
 
 
