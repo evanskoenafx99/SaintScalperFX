@@ -48,30 +48,21 @@ def detect(filepath):
 
     zones = []
 
-
     if active:
 
         start = active[0]
         previous = active[0]
 
-
         for x in active[1:]:
 
             if x - previous > 6:
-
-                zones.append(
-                    (start, previous)
-                )
-
+                zones.append((start, previous))
                 start = x
-
 
             previous = x
 
 
-        zones.append(
-            (start, previous)
-        )
+        zones.append((start, previous))
 
 
 
@@ -83,48 +74,65 @@ def detect(filepath):
         width = end - start
 
 
+        parts = 1
+
         if width > 25:
-
-            parts = max(1, width // 10)
-
-            step = width / parts
+            parts = width // 10
 
 
-            for i in range(parts):
+        for i in range(parts):
 
-                candle_start = int(start + i * step)
-                candle_end = int(start + (i + 1) * step)
-
-                candles.append(
-                    {
-                        "start": candle_start,
-                        "end": candle_end,
-                        "width": candle_end - candle_start
-                    }
-                )
+            candle_start = int(start + (i * width / parts))
+            candle_end = int(start + ((i + 1) * width / parts))
 
 
-        elif width >= 4:
+            if candle_end - candle_start >= 4:
 
-            candles.append(
-                {
-                    "start": start,
-                    "end": end,
-                    "width": width
-                }
-            )
+                red = 0
+                green = 0
 
 
+                for cx in range(candle_start, candle_end):
 
-    # Add simple candle strength analysis
+                    for cy in range(chart.size[1]):
 
-    for candle in candles:
+                        r, g, b = pixels[cx, cy]
 
-        if candle["width"] >= 15:
-            candle["strength"] = "STRONG"
 
-        else:
-            candle["strength"] = "NORMAL"
+                        if r > 150 and g < 120 and b < 120:
+                            red += 1
+
+
+                        elif g > r and g > b:
+                            green += 1
+
+
+
+                if red > green:
+                    direction = "BEARISH"
+
+                elif green > red:
+                    direction = "BULLISH"
+
+                else:
+                    direction = "UNKNOWN"
+
+
+
+                if (candle_end - candle_start) >= 15:
+                    strength = "STRONG"
+
+                else:
+                    strength = "NORMAL"
+
+
+
+                candles.append({
+                    "start": candle_start,
+                    "end": candle_end,
+                    "direction": direction,
+                    "strength": strength
+                })
 
 
 
