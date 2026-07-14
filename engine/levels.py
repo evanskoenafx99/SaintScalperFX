@@ -92,6 +92,59 @@ def detect_levels(image_path):
     resistance_zones = build_zones(resistances)
 
 
+    def rank_zones(zones):
+
+        for zone in zones:
+
+            if zone["touches"] >= 10:
+                zone["strength"] = "STRONG"
+
+            elif zone["touches"] >= 4:
+                zone["strength"] = "MEDIUM"
+
+            else:
+                zone["strength"] = "WEAK"
+
+
+        zones.sort(
+            key=lambda x: x["touches"],
+            reverse=True
+        )
+
+        return zones[:3]
+
+
+
+    support_zones = build_zones(supports)
+    resistance_zones = build_zones(resistances)
+
+
+    def rank_zones(zones):
+
+        for zone in zones:
+
+            if zone["touches"] >= 10:
+                zone["strength"] = "STRONG"
+
+            elif zone["touches"] >= 4:
+                zone["strength"] = "MEDIUM"
+
+            else:
+                zone["strength"] = "WEAK"
+
+
+        zones.sort(
+            key=lambda x: x["touches"],
+            reverse=True
+        )
+
+        return zones[:3]
+
+
+    support_zones = rank_zones(support_zones)
+    resistance_zones = rank_zones(resistance_zones)
+
+
     return {
         "support": support_zones,
         "resistance": resistance_zones
