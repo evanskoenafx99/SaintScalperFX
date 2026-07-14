@@ -1,10 +1,7 @@
 from flask import Flask, render_template, request, send_from_directory, redirect, url_for, session
 from ai import analyze_chart
-from engine.candle_shapes import detect
-from engine.pattern_detector import analyze as analyze_pattern
 import sqlite3
 import os
-
 app = Flask(__name__)
 
 app.secret_key = "saintscalperfx_secret_key"
@@ -259,18 +256,6 @@ def upload():
 
 
     result = analyze_chart(filepath)
-    candle_data = detect(filepath)
-
-    pattern_data = analyze_pattern(
-        candle_data["candles"]
-    )
-
-    result.update(pattern_data)
-
-    result.update({
-        "candle_count": candle_data["candles_found"],
-        "candle_bias": candle_data["bias"]
-    })
 
 
 
