@@ -7,49 +7,65 @@ def detect_levels(image_path):
 
     width, height = img.size
 
-    levels = []
+    rows = []
 
+    # Scan only chart area
     for y in range(int(height * 0.15), int(height * 0.75)):
 
-        pixels = []
+        brightness = 0
 
         for x in range(width):
 
             r, g, b = img.getpixel((x, y))
 
             if r > 100 and g > 100 and b > 100:
-                pixels.append(x)
+                brightness += 1
 
-        if len(pixels) > width * 0.25:
-            levels.append(y)
+        if brightness > width * 0.15:
+            rows.append(y)
 
 
     zones = []
 
-    if levels:
+    if rows:
 
-        start = levels[0]
-        end = levels[0]
+        start = rows[0]
+        end = rows[0]
 
-        for level in levels[1:]:
+        for y in rows[1:]:
 
-            if level <= end + 5:
-                end = level
+            if y <= end + 8:
+                end = y
 
             else:
+
                 zones.append({
                     "start": start,
-                    "end": end
+                    "end": end,
+                    "strength": "NORMAL"
                 })
 
-                start = level
-                end = level
+                start = y
+                end = y
 
 
         zones.append({
             "start": start,
-            "end": end
+            "end": end,
+            "strength": "NORMAL"
         })
+
+
+    # Strength calculation
+    for zone in zones:
+
+        size = zone["end"] - zone["start"]
+
+        if size > 15:
+            zone["strength"] = "STRONG"
+
+        elif size > 5:
+            zone["strength"] = "MEDIUM"
 
 
     return {
