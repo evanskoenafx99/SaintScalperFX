@@ -5,6 +5,40 @@ import os
 JOURNAL_FILE = "data/trades.json"
 
 
+def group_stats(trades, key):
+
+    stats = {}
+
+    for trade in trades:
+
+        value = trade.get(key, "UNKNOWN")
+
+        if value not in stats:
+            stats[value] = {
+                "wins": 0,
+                "losses": 0
+            }
+
+
+        if trade["result"] == "WIN":
+            stats[value]["wins"] += 1
+
+        else:
+            stats[value]["losses"] += 1
+
+
+        total = stats[value]["wins"] + stats[value]["losses"]
+
+        stats[value]["win_rate"] = round(
+            (stats[value]["wins"] / total) * 100,
+            2
+        )
+
+
+    return stats
+
+
+
 def calculate_backtest():
 
     if not os.path.exists(JOURNAL_FILE):
@@ -33,30 +67,12 @@ def calculate_backtest():
         win_rate = round((wins / total) * 100, 2)
 
 
-    signal_stats = {}
-
-    for trade in closed:
-
-        signal = trade.get("signal")
-
-        if signal not in signal_stats:
-            signal_stats[signal] = {
-                "wins": 0,
-                "losses": 0
-            }
-
-
-        if trade["result"] == "WIN":
-            signal_stats[signal]["wins"] += 1
-
-        else:
-            signal_stats[signal]["losses"] += 1
-
-
     return {
         "trades": total,
         "wins": wins,
         "losses": losses,
         "win_rate": win_rate,
-        "signals": signal_stats
+        "signals": group_stats(closed, "signal"),
+        "patterns": group_stats(closed, "pattern"),
+        "momentum": group_stats(closed, "momentum")
     }
