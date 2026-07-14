@@ -2,48 +2,61 @@ import json
 import os
 
 
+JOURNAL_FILE = "data/trades.json"
+
+
 def calculate_backtest():
 
-    file = "data/trades.json"
-
-    if not os.path.exists(file):
-        return {
-            "trades": 0,
-            "wins": 0,
-            "losses": 0,
-            "win_rate": 0
-        }
+    if not os.path.exists(JOURNAL_FILE):
+        return {}
 
 
-    with open(file, "r") as f:
-        trades = json.load(f)
+    with open(JOURNAL_FILE, "r") as file:
+        trades = json.load(file)
 
 
-    wins = 0
-    losses = 0
+    closed = [
+        t for t in trades
+        if t.get("result") in ["WIN", "LOSS"]
+    ]
 
 
-    for trade in trades:
-
-        if trade["result"] == "WIN":
-            wins += 1
-
-        elif trade["result"] == "LOSS":
-            losses += 1
+    wins = sum(1 for t in closed if t["result"] == "WIN")
+    losses = sum(1 for t in closed if t["result"] == "LOSS")
 
 
-    total = wins + losses
-
+    total = len(closed)
 
     win_rate = 0
 
-    if total > 0:
+    if total:
         win_rate = round((wins / total) * 100, 2)
+
+
+    signal_stats = {}
+
+    for trade in closed:
+
+        signal = trade.get("signal")
+
+        if signal not in signal_stats:
+            signal_stats[signal] = {
+                "wins": 0,
+                "losses": 0
+            }
+
+
+        if trade["result"] == "WIN":
+            signal_stats[signal]["wins"] += 1
+
+        else:
+            signal_stats[signal]["losses"] += 1
 
 
     return {
         "trades": total,
         "wins": wins,
         "losses": losses,
-        "win_rate": win_rate
+        "win_rate": win_rate,
+        "signals": signal_stats
     }
