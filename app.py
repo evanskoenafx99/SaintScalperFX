@@ -314,7 +314,13 @@ def upload():
     grade=result["grade"],
     buy_score=result["buy_score"],
     sell_score=result["sell_score"],
-    engines=result["engines"]
+    engines=result["engines"],
+candle_count=result["candle_count"],
+candle_bias=result["candle_bias"],
+bullish_candles=result["bullish_candles"],
+bearish_candles=result["bearish_candles"],
+pattern=result["pattern"],
+momentum=result["momentum"]
 )
 
 
