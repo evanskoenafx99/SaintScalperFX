@@ -7,3 +7,4 @@ users.db
 *.db
 
 *.log
+backups/
