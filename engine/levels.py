@@ -1,4 +1,5 @@
 from PIL import Image
+from engine.candle_shapes import detect
 
 
 def detect_levels(image_path):
@@ -7,68 +8,91 @@ def detect_levels(image_path):
 
     width, height = img.size
 
-    rows = []
+    candles = detect(image_path)["candles"]
 
-    # Scan only chart area
-    for y in range(int(height * 0.15), int(height * 0.75)):
+    supports = []
+    resistances = []
 
-        brightness = 0
 
-        for x in range(width):
+    for candle in candles:
+
+        x = int((candle["start"] + candle["end"]) / 2)
+
+        highs = []
+        lows = []
+
+
+        for y in range(int(height * 0.15), int(height * 0.75)):
 
             r, g, b = img.getpixel((x, y))
 
-            if r > 100 and g > 100 and b > 100:
-                brightness += 1
+            if r < 80 and g < 80 and b < 80:
+                continue
 
-        if brightness > width * 0.15:
-            rows.append(y)
+            if r > 100 or g > 100 or b > 100:
+                highs.append(y)
 
 
-    zones = []
+        if highs:
 
-    if rows:
+            top = min(highs)
+            bottom = max(highs)
 
-        start = rows[0]
-        end = rows[0]
+            resistances.append(top)
+            supports.append(bottom)
 
-        for y in rows[1:]:
 
-            if y <= end + 8:
-                end = y
+
+    def build_zones(values):
+
+        zones = []
+
+        values.sort()
+
+        if not values:
+            return zones
+
+
+        start = values[0]
+        end = values[0]
+        touches = 1
+
+
+        for value in values[1:]:
+
+            if value <= end + 15:
+                end = value
+                touches += 1
 
             else:
 
                 zones.append({
                     "start": start,
                     "end": end,
-                    "strength": "NORMAL"
+                    "touches": touches
                 })
 
-                start = y
-                end = y
+                start = value
+                end = value
+                touches = 1
 
 
         zones.append({
             "start": start,
             "end": end,
-            "strength": "NORMAL"
+            "touches": touches
         })
 
 
-    # Strength calculation
-    for zone in zones:
+        return zones
 
-        size = zone["end"] - zone["start"]
 
-        if size > 15:
-            zone["strength"] = "STRONG"
 
-        elif size > 5:
-            zone["strength"] = "MEDIUM"
+    support_zones = build_zones(supports)
+    resistance_zones = build_zones(resistances)
 
 
     return {
-        "levels_found": len(zones),
-        "zones": zones
+        "support": support_zones,
+        "resistance": resistance_zones
     }
