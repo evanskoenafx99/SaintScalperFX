@@ -31,17 +31,16 @@ def detect(filepath):
             r, g, b = pixels[x, y]
 
 
-            # Bearish MT5 candle
+            # Bearish candle colour
             if r > 150 and g < 120 and b < 120:
                 count += 1
                 bearish_pixels += 1
 
 
-            # Bullish MT5 candle (dark green)
+            # Bullish dark green candle colour
             elif g > r and g > b:
                 count += 1
                 bullish_pixels += 1
-
 
 
         if count > 2:
@@ -49,8 +48,9 @@ def detect(filepath):
 
 
 
-    zones = []
+    # Group active columns
 
+    zones = []
 
     if active:
 
@@ -83,16 +83,39 @@ def detect(filepath):
 
     for start, end in zones:
 
-        candle_width = end - start
+        width = end - start
 
 
-        if 1 <= candle_width <= 40:
+        # Split large zones
+        if width > 25:
+
+            parts = max(1, width // 10)
+
+            step = width / parts
+
+
+            for i in range(parts):
+
+                candle_start = int(start + (i * step))
+                candle_end = int(start + ((i + 1) * step))
+
+
+                candles.append(
+                    {
+                        "start": candle_start,
+                        "end": candle_end,
+                        "width": candle_end - candle_start
+                    }
+                )
+
+
+        elif width >= 4:
 
             candles.append(
                 {
                     "start": start,
                     "end": end,
-                    "width": candle_width
+                    "width": width
                 }
             )
 
@@ -114,5 +137,5 @@ def detect(filepath):
         "bullish_pixels": bullish_pixels,
         "bearish_pixels": bearish_pixels,
         "bias": bias,
-        "candles": candles[:30]
+        "candles": candles[:50]
     }
