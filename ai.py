@@ -5,6 +5,7 @@ from engine.pattern_detector import analyze as pattern_analyze
 from engine.levels import detect_levels
 from engine.trade_plan import generate_trade_plan
 from engine.confidence_filter import evaluate_confidence
+from engine.signal_filter import validate_signal
 
 
 def analyze_chart(filepath):
@@ -21,26 +22,27 @@ def analyze_chart(filepath):
     brain = SaintScalperBrain()
     result = brain.analyze(candles)
 
-    signal = result["signal"]
+    original_signal = result["signal"]
 
     confidence_check = evaluate_confidence(result["confidence"])
 
+    final_check = validate_signal(
+        original_signal,
+        pattern["pattern"],
+        pattern["momentum"],
+        confidence_check["status"]
+    )
+
+    signal = final_check["signal"]
+
+
     grade = confidence_check["grade"]
 
-
-    if signal == "BUY":
-
-        reason = "Bullish setup detected by AI engines."
+    if signal == "WAIT":
+        grade = "C"
 
 
-    elif signal == "SELL":
-
-        reason = "Bearish setup detected by AI engines."
-
-
-    else:
-
-        reason = "No high probability setup detected."
+    reason = final_check["reason"]
 
 
     trade_plan = generate_trade_plan(
@@ -52,40 +54,27 @@ def analyze_chart(filepath):
 
 
     return {
-
         "signal": signal,
-
         "trend": pattern["pattern"],
-
         "confidence": f"{result['confidence']}%",
-
         "confidence_status": confidence_check["status"],
-
         "confidence_message": confidence_check["message"],
-
         "reason": reason,
 
         "entry": trade_plan["entry"],
-
         "stop_loss": trade_plan["stop_loss"],
-
         "take_profit": trade_plan["take_profit"],
 
         "grade": grade,
 
         "buy_score": result["buy_score"],
-
         "sell_score": result["sell_score"],
-
         "engines": result["engines"],
 
         "vision": vision,
-
         "candles_detected": len(candles),
 
         "pattern": pattern,
-
         "levels": levels,
-
         "trade_plan": trade_plan
     }
