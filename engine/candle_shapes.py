@@ -18,6 +18,9 @@ def detect(filepath):
 
     active = []
 
+    bullish_pixels = 0
+    bearish_pixels = 0
+
 
     for x in range(chart.size[0]):
 
@@ -28,9 +31,17 @@ def detect(filepath):
             r, g, b = pixels[x, y]
 
 
-            # MT5 red candle detection
+            # Bearish MT5 candle
             if r > 150 and g < 120 and b < 120:
                 count += 1
+                bearish_pixels += 1
+
+
+            # Bullish MT5 candle (dark green)
+            elif g > r and g > b:
+                count += 1
+                bullish_pixels += 1
+
 
 
         if count > 2:
@@ -72,21 +83,36 @@ def detect(filepath):
 
     for start, end in zones:
 
-        width = end - start
+        candle_width = end - start
 
 
-        if 1 <= width <= 40:
+        if 1 <= candle_width <= 40:
 
             candles.append(
                 {
                     "start": start,
                     "end": end,
-                    "width": width
+                    "width": candle_width
                 }
             )
 
 
+
+    if bullish_pixels > bearish_pixels:
+        bias = "BULLISH"
+
+    elif bearish_pixels > bullish_pixels:
+        bias = "BEARISH"
+
+    else:
+        bias = "NEUTRAL"
+
+
+
     return {
         "candles_found": len(candles),
+        "bullish_pixels": bullish_pixels,
+        "bearish_pixels": bearish_pixels,
+        "bias": bias,
         "candles": candles[:30]
     }
