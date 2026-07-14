@@ -84,10 +84,21 @@ def analyze_chart(filepath):
 
         "vision": vision,
 
-        "candles_detected": len(candles),
 
 
-        "pattern": pattern,
+            "candles_detected": len(candles),
+
+        "candle_count": len(candles),
+
+        "candle_bias": pattern["pattern"],
+
+        "bullish_candles": pattern["bullish_candles"],
+
+        "bearish_candles": pattern["bearish_candles"],
+
+        "pattern": pattern["pattern"],
+
+        "momentum": pattern["momentum"],
 
         "levels": levels
-    }
+}
