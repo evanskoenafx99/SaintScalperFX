@@ -21,37 +21,73 @@ def analyze_chart(filepath):
 
     signal = result["signal"]
 
-    if signal == "BUY":
-        reason = "Bullish setup detected. AI engines confirm buying pressure."
+
+    if pattern["pattern"] == "BEARISH CONTINUATION" and pattern["momentum"] == "STRONG SELLING":
+
+        signal = "SELL"
+        reason = "Bearish continuation confirmed by candle pattern and selling momentum."
         grade = "A"
+
+
+    elif pattern["pattern"] == "BULLISH CONTINUATION" and pattern["momentum"] == "STRONG BUYING":
+
+        signal = "BUY"
+        reason = "Bullish continuation confirmed by candle pattern and buying momentum."
+        grade = "A"
+
+
+    elif signal == "BUY":
+
+        reason = "Bullish setup detected by AI engines."
+        grade = "B"
+
 
     elif signal == "SELL":
-        reason = "Bearish setup detected. AI engines confirm selling pressure."
-        grade = "A"
+
+        reason = "Bearish setup detected by AI engines."
+        grade = "B"
+
 
     else:
+
         reason = "No high probability setup detected."
         grade = "C"
 
 
+
     return {
+
         "signal": signal,
+
         "trend": pattern["pattern"],
+
         "confidence": f"{result['confidence']}%",
+
         "reason": reason,
 
+
         "entry": "Wait for confirmation candle",
+
         "stop_loss": "Use recent support/resistance",
+
         "take_profit": "Minimum Risk : Reward 1:3",
 
+
         "grade": grade,
+
         "buy_score": result["buy_score"],
+
         "sell_score": result["sell_score"],
+
         "engines": result["engines"],
 
+
         "vision": vision,
+
         "candles_detected": len(candles),
 
+
         "pattern": pattern,
+
         "levels": levels
     }
