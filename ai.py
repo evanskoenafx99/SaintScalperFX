@@ -1,40 +1,47 @@
 from engine.ai import SaintScalperBrain
 from engine.vision import analyze as vision_analyze
-from engine.candle_detector import extract
+from engine.candle_shapes import detect
+from engine.pattern_detector import analyze as pattern_analyze
+from engine.levels import detect_levels
 
 
 def analyze_chart(filepath):
 
-    # Analyze uploaded image
     vision = vision_analyze(filepath)
 
-    # Extract candles from screenshot
-    data = extract(filepath)
+    data = detect(filepath)
     candles = data["candles"]
 
-    # Run AI Brain
+    pattern = pattern_analyze(candles)
+
+    levels = detect_levels(filepath)
+
     brain = SaintScalperBrain()
     result = brain.analyze(candles)
 
     signal = result["signal"]
 
     if signal == "BUY":
-        reason = "Multiple AI engines detected a bullish trading opportunity."
+        reason = "Bullish setup detected. AI engines confirm buying pressure."
         grade = "A"
+
     elif signal == "SELL":
-        reason = "Multiple AI engines detected a bearish trading opportunity."
+        reason = "Bearish setup detected. AI engines confirm selling pressure."
         grade = "A"
+
     else:
-        reason = "No high-probability setup detected."
+        reason = "No high probability setup detected."
         grade = "C"
+
 
     return {
         "signal": signal,
-        "trend": "AI Multi-Engine",
+        "trend": pattern["pattern"],
         "confidence": f"{result['confidence']}%",
         "reason": reason,
+
         "entry": "Wait for confirmation candle",
-        "stop_loss": "Below recent swing",
+        "stop_loss": "Use recent support/resistance",
         "take_profit": "Minimum Risk : Reward 1:3",
 
         "grade": grade,
@@ -43,5 +50,8 @@ def analyze_chart(filepath):
         "engines": result["engines"],
 
         "vision": vision,
-        "candles_detected": len(candles)
+        "candles_detected": len(candles),
+
+        "pattern": pattern,
+        "levels": levels
     }
