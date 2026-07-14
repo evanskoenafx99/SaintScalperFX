@@ -1,0 +1,24 @@
+[
+    {
+        "time": "2026-07-14 05:50:39",
+        "signal": "SELL",
+        "confidence": "75%",
+        "pattern": "BEARISH CONTINUATION",
+        "momentum": "STRONG SELLING",
+        "entry": "1.0850",
+        "stop_loss": "1.0900",
+        "take_profit": "1.0750",
+        "result": "OPEN"
+    },
+    {
+        "time": "2026-07-14 05:52:39",
+        "signal": "SELL",
+        "confidence": 25,
+        "pattern": "BEARISH CONTINUATION",
+        "momentum": "STRONG SELLING",
+        "entry": "Wait for confirmation candle",
+        "stop_loss": "Use recent support/resistance",
+        "take_profit": "Minimum Risk : Reward 1:3",
+        "result": "WIN"
+    }
+]
