@@ -4,6 +4,7 @@ from engine.candle_shapes import detect
 from engine.pattern_detector import analyze as pattern_analyze
 from engine.levels import detect_levels
 from engine.trade_plan import generate_trade_plan
+from engine.confidence_filter import evaluate_confidence
 
 
 def analyze_chart(filepath):
@@ -22,37 +23,24 @@ def analyze_chart(filepath):
 
     signal = result["signal"]
 
+    confidence_check = evaluate_confidence(result["confidence"])
 
-    if pattern["pattern"] == "BEARISH CONTINUATION" and pattern["momentum"] == "STRONG SELLING":
-
-        signal = "SELL"
-        reason = "Bearish continuation confirmed by candle pattern and selling momentum."
-        grade = "A"
+    grade = confidence_check["grade"]
 
 
-    elif pattern["pattern"] == "BULLISH CONTINUATION" and pattern["momentum"] == "STRONG BUYING":
-
-        signal = "BUY"
-        reason = "Bullish continuation confirmed by candle pattern and buying momentum."
-        grade = "A"
-
-
-    elif signal == "BUY":
+    if signal == "BUY":
 
         reason = "Bullish setup detected by AI engines."
-        grade = "B"
 
 
     elif signal == "SELL":
 
         reason = "Bearish setup detected by AI engines."
-        grade = "B"
 
 
     else:
 
         reason = "No high probability setup detected."
-        grade = "C"
 
 
     trade_plan = generate_trade_plan(
@@ -71,6 +59,10 @@ def analyze_chart(filepath):
 
         "confidence": f"{result['confidence']}%",
 
+        "confidence_status": confidence_check["status"],
+
+        "confidence_message": confidence_check["message"],
+
         "reason": reason,
 
         "entry": trade_plan["entry"],
@@ -78,7 +70,6 @@ def analyze_chart(filepath):
         "stop_loss": trade_plan["stop_loss"],
 
         "take_profit": trade_plan["take_profit"],
-
 
         "grade": grade,
 
@@ -88,23 +79,11 @@ def analyze_chart(filepath):
 
         "engines": result["engines"],
 
-
         "vision": vision,
 
         "candles_detected": len(candles),
 
-        "candle_count": len(candles),
-
-        "candle_bias": pattern["pattern"],
-
-        "bullish_candles": pattern["bullish_candles"],
-
-        "bearish_candles": pattern["bearish_candles"],
-
-
-        "pattern": pattern["pattern"],
-
-        "momentum": pattern["momentum"],
+        "pattern": pattern,
 
         "levels": levels,
 
