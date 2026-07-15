@@ -15,80 +15,103 @@ def analyze(candles):
             "reason": "Not enough candles."
         }
 
+
     structure = structure_analyze(candles)
     liquidity = liquidity_analyze(candles)
     fvg = fvg_analyze(candles)
     orderblock = orderblock_analyze(candles)
 
-    buy_score = 0
-    sell_score = 0
+
+    score = 0
+    signal = "WAIT"
     reasons = []
 
-    bos = structure.get("bos", False)
-    choch = structure.get("choch", False)
 
-    # Market structure
+    # BOS gives the SMC market bias
+
     if structure.get("signal") == "BUY":
-        buy_score += 15
+
+        signal = "BUY"
+        score += 20
         reasons.append("Bullish BOS")
 
-    if structure.get("signal") == "SELL":
-        sell_score += 15
+
+    elif structure.get("signal") == "SELL":
+
+        signal = "SELL"
+        score += 20
         reasons.append("Bearish BOS")
 
-    # Liquidity
-    if liquidity.get("signal") == "BUY":
-        buy_score += 15
-        reasons.append("Liquidity sweep for BUY")
 
-    if liquidity.get("signal") == "SELL":
-        sell_score += 15
-        reasons.append("Liquidity sweep for SELL")
+
+    # Liquidity confirmation
+
+    if liquidity.get("signal") == signal:
+
+        score += 15
+        reasons.append("Liquidity confirmation")
+
+
+    elif liquidity.get("signal") != "WAIT":
+
+        reasons.append("Liquidity sweep against bias")
+
+
 
     # Fair Value Gap
-    if fvg.get("signal") == "BUY":
-        buy_score += 10
-        reasons.append("Bullish FVG")
 
-    if fvg.get("signal") == "SELL":
-        sell_score += 10
-        reasons.append("Bearish FVG")
+    if fvg.get("signal") == signal:
 
-    # Order Blocks
-    if orderblock.get("signal") == "BUY":
-        buy_score += 15
-        reasons.append("Bullish order block")
-
-    if orderblock.get("signal") == "SELL":
-        sell_score += 15
-        reasons.append("Bearish order block")
+        score += 10
+        reasons.append("FVG confirmation")
 
 
-    if buy_score > sell_score:
-        signal = "BUY"
-        score = buy_score
 
-    elif sell_score > buy_score:
-        signal = "SELL"
-        score = sell_score
+    # Order Block
 
-    else:
+    if orderblock.get("signal") == signal:
+
+        score += 15
+        reasons.append("Order block confirmation")
+
+
+
+    # CHoCH reversal logic
+
+    if structure.get("choch"):
+
+        if liquidity.get("signal") != "WAIT":
+
+            signal = liquidity.get("signal")
+            score = 25
+            reasons.append("CHoCH reversal")
+
+
+
+    confidence = min(score * 3, 95)
+
+
+    if score < 20:
+
         signal = "WAIT"
-        score = 10
 
-
-    confidence = min(score * 2, 95)
 
 
     return {
+
         "engine": "SMC",
         "signal": signal,
         "score": score,
         "confidence": confidence,
-        "reason": ", ".join(reasons) if reasons else "No SMC setup.",
-        "bos": bos,
-        "choch": choch,
-        "orderblock": orderblock.get("signal") != "WAIT",
+
+        "reason": ", ".join(reasons)
+        if reasons else "No SMC setup.",
+
+        "bos": structure.get("bos", False),
+        "choch": structure.get("choch", False),
+
         "liquidity": liquidity.get("signal") != "WAIT",
-        "fvg": fvg.get("signal") != "WAIT"
+        "fvg": fvg.get("signal") != "WAIT",
+        "orderblock": orderblock.get("signal") != "WAIT"
+
     }

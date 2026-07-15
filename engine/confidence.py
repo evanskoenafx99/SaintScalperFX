@@ -1,27 +1,44 @@
+ENGINE_WEIGHTS = {
+    "ict": 20,
+    "smc": 20,
+    "structure": 15,
+    "trend": 10,
+    "orderblock": 10,
+    "fvg": 10,
+    "liquidity": 5,
+    "session": 5,
+    "risk": 5
+}
+
+
 def calculate(results):
 
-    total_score = 0
-    max_score = 0
+    score = 0
+    maximum = sum(ENGINE_WEIGHTS.values())
 
-    for engine in results:
-        total_score += engine.get("score", 0)
-        max_score += 20
+    for result in results:
 
-    if max_score == 0:
-        confidence = 0
-    else:
-        confidence = round((total_score / max_score) * 100)
+        engine = result.get("engine", "").lower()
+        signal = result.get("signal", "").upper()
 
-    if confidence >= 95:
+        if signal == "BUY":
+            score += ENGINE_WEIGHTS.get(engine, 0)
+
+        elif signal == "SELL":
+            score += ENGINE_WEIGHTS.get(engine, 0)
+
+    confidence = round((score / maximum) * 100)
+
+    if confidence >= 90:
         grade = "A+"
 
-    elif confidence >= 90:
+    elif confidence >= 80:
         grade = "A"
 
-    elif confidence >= 80:
+    elif confidence >= 70:
         grade = "B"
 
-    elif confidence >= 70:
+    elif confidence >= 60:
         grade = "C"
 
     else:

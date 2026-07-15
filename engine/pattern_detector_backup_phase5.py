@@ -13,62 +13,49 @@ def analyze(candles):
             bearish += 1
 
 
-
     total = bullish + bearish
 
 
     if total == 0:
-
         return {
             "pattern": "NO DATA",
             "momentum": "UNKNOWN"
         }
 
 
-
     bullish_ratio = bullish / total
     bearish_ratio = bearish / total
 
 
+    # Candle momentum detection
 
-    # Strong candle pressure detection
+    if bullish_ratio > 0.65:
 
-    if bearish_ratio > 0.65:
-
-        pattern = "BEARISH PRESSURE"
-
-        momentum = "STRONG SELLING"
-
-
-
-    elif bullish_ratio > 0.65:
-
-        pattern = "BULLISH PRESSURE"
-
+        pattern = "BULLISH CONTINUATION"
         momentum = "STRONG BUYING"
 
+
+    elif bearish_ratio > 0.65:
+
+        pattern = "BEARISH CONTINUATION"
+        momentum = "STRONG SELLING"
 
 
     elif bullish > bearish:
 
         pattern = "BULLISH BIAS"
-
         momentum = "BUY PRESSURE"
-
 
 
     elif bearish > bullish:
 
         pattern = "BEARISH BIAS"
-
         momentum = "SELL PRESSURE"
-
 
 
     else:
 
         pattern = "SIDEWAYS"
-
         momentum = "NEUTRAL"
 
 

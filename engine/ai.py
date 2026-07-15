@@ -1,3 +1,7 @@
+from engine.debug_console import DebugConsole
+from engine.decision_logger import DecisionLogger
+from datetime import datetime
+logger = DecisionLogger()
 from engine.trend import analyze as trend_analyze
 from engine.structure import analyze as structure_analyze
 from engine.liquidity import analyze as liquidity_analyze
@@ -56,15 +60,49 @@ class SaintScalperBrain:
             if r.get("signal") == "SELL"
         )
 
-        if buy_score > sell_score:
-            signal = "BUY"
+buy_votes = sum(
+    1 for r in results
+    if r.get("signal") == "BUY"
+)
 
-        elif sell_score > buy_score:
-            signal = "SELL"
+sell_votes = sum(
+    1 for r in results
+    if r.get("signal") == "SELL"
+)
 
-        else:
-            signal = "WAIT"
+MINIMUM_AGREEMENT = 5
 
+if buy_votes >= MINIMUM_AGREEMENT and buy_score > sell_score:
+    signal = "BUY"
+
+elif sell_votes >= MINIMUM_AGREEMENT and sell_score > buy_score:
+    signal = "SELL"
+
+else:
+    signal = "WAIT"
+logger.save({
+    "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    "symbol": symbol if "symbol" in locals() else "UNKNOWN",
+    "timeframe": timeframe if "timeframe" in locals() else "UNKNOWN",
+    "signal": signal,
+    "confidence": confidence["confidence"],
+    "grade": confidence["grade"],
+    "buy_score": buy_score,
+    "sell_score": sell_score,
+    "engines": results,
+   "reason": "Multi-engine ICT + SMC analysis completed.",
+"entry": entry if "entry" in locals() else None,
+"stop_loss": stop_loss if "stop_loss" in locals() else None,
+"take_profit": take_profit if "take_profit" in locals() else None
+})
+
+  DebugConsole.show(
+    results=results,
+    signal=signal,
+    confidence=confidence["confidence"],
+    buy_score=buy_score,
+    sell_score=sell_score
+)
         return {
             "signal": signal,
             "confidence": confidence["confidence"],

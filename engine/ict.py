@@ -15,74 +15,105 @@ def analyze(candles):
             "reason": "Not enough candles."
         }
 
+
     structure = structure_analyze(candles)
     liquidity = liquidity_analyze(candles)
     fvg = fvg_analyze(candles)
     orderblock = orderblock_analyze(candles)
 
-    buy_score = 0
-    sell_score = 0
+
+    score = 0
+    signal = "WAIT"
     reasons = []
 
-    bos = structure.get("bos", False)
+
+    # Main ICT bias comes from structure
 
     if structure.get("signal") == "BUY":
-        buy_score += 15
-        reasons.append("Bullish structure")
 
-    if structure.get("signal") == "SELL":
-        sell_score += 15
-        reasons.append("Bearish structure")
-
-    if liquidity.get("signal") == "BUY":
-        buy_score += 15
-        reasons.append("Sell-side liquidity sweep")
-
-    if liquidity.get("signal") == "SELL":
-        sell_score += 15
-        reasons.append("Buy-side liquidity sweep")
-
-    if fvg.get("signal") == "BUY":
-        buy_score += 10
-        reasons.append("Bullish FVG")
-
-    if fvg.get("signal") == "SELL":
-        sell_score += 10
-        reasons.append("Bearish FVG")
-
-    if orderblock.get("signal") == "BUY":
-        buy_score += 10
-        reasons.append("Bullish order block")
-
-    if orderblock.get("signal") == "SELL":
-        sell_score += 10
-        reasons.append("Bearish order block")
-
-
-    if buy_score > sell_score:
+        score += 20
         signal = "BUY"
-        score = buy_score
+        reasons.append("Bullish BOS")
 
-    elif sell_score > buy_score:
+
+    elif structure.get("signal") == "SELL":
+
+        score += 20
         signal = "SELL"
-        score = sell_score
+        reasons.append("Bearish BOS")
 
-    else:
+
+
+    # Liquidity confirmation
+
+    if liquidity.get("signal") == signal:
+
+        score += 15
+        reasons.append("Liquidity confirmation")
+
+
+    # Liquidity against structure = warning, not immediate reversal
+
+    elif liquidity.get("signal") != "WAIT":
+
+        reasons.append("Liquidity sweep against bias")
+
+
+
+    # FVG confirmation
+
+    if fvg.get("signal") == signal:
+
+        score += 10
+        reasons.append("FVG confirmation")
+
+
+
+    # Order block confirmation
+
+    if orderblock.get("signal") == signal:
+
+        score += 10
+        reasons.append("Order block confirmation")
+
+
+
+    # Only reverse if CHoCH exists
+
+    if structure.get("choch"):
+
+        if liquidity.get("signal") != "WAIT":
+
+            signal = liquidity.get("signal")
+            score = 25
+            reasons.append("CHoCH reversal")
+
+
+
+    confidence = min(score * 3, 95)
+
+
+    if score < 20:
+
         signal = "WAIT"
-        score = 10
 
-
-    confidence = min(score * 2, 95)
 
 
     return {
+
         "engine": "ICT",
         "signal": signal,
         "score": score,
         "confidence": confidence,
-        "reason": ", ".join(reasons) if reasons else "No ICT setup.",
-        "bos": bos,
+
+        "reason": ", ".join(reasons)
+        if reasons else "No ICT setup.",
+
+        "bos": structure.get("bos", False),
+        "choch": structure.get("choch", False),
+
         "liquidity": liquidity.get("signal") != "WAIT",
         "fvg": fvg.get("signal") != "WAIT",
         "orderblock": orderblock.get("signal") != "WAIT"
+
     }
