@@ -2,16 +2,26 @@ class DebugConsole:
 
     @staticmethod
     def show(results, signal, confidence, buy_score, sell_score):
-        print("\n==============================")
-        print("   SAINTSCALPERFX AI")
-        print("==============================")
 
-        for engine, value in results.items():
-            print(f"{engine:<15}: {value}")
+        print("\n" + "=" * 60)
+        print("        SaintScalperFX AI Debug Console")
+        print("=" * 60)
 
-        print("------------------------------")
-        print(f"BUY Score      : {buy_score}")
-        print(f"SELL Score     : {sell_score}")
-        print(f"Confidence     : {confidence}%")
-        print(f"FINAL SIGNAL   : {signal}")
-        print("==============================\n")
+        print(f"Signal      : {signal}")
+        print(f"Confidence  : {confidence}%")
+        print(f"Buy Score   : {buy_score}")
+        print(f"Sell Score  : {sell_score}")
+
+        print("\nEngine Results")
+        print("-" * 60)
+
+        for result in results:
+
+            print(f"Engine      : {result.get('engine', 'Unknown')}")
+            print(f"Signal      : {result.get('signal', 'WAIT')}")
+            print(f"Score       : {result.get('score', 0)}")
+            print(f"Confidence  : {result.get('confidence', 0)}")
+            print(f"Reason      : {result.get('reason', 'No reason')}")
+            print("-" * 60)
+
+        print("=" * 60 + "\n")

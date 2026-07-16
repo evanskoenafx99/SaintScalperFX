@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SaintScalperFX Pro</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+
+background:#050b18;
+color:white;
+display:flex;
+
+}
+
+/* ===========================
+   SIDEBAR
+=========================== */
+
+.sidebar{
+
+width:250px;
+height:100vh;
+background:#0d1528;
+padding:25px;
+position:fixed;
+left:0;
+top:0;
+border-right:1px solid #1e293b;
+
+}
+
+.logo{
+
+font-size:28px;
+font-weight:bold;
+margin-bottom:40px;
+color:#00b7ff;
+
+}
+
+.logo span{
+
+color:white;
+
+}
+
+.menu a{
+
+display:block;
+text-decoration:none;
+color:#cbd5e1;
+padding:14px 18px;
+margin-bottom:10px;
+border-radius:12px;
+transition:.3s;
+
+}
+
+.menu a:hover{
+
+background:#00b7ff;
+color:white;
+
+}
+
+.menu .active{
+
+background:#00b7ff;
+color:white;
+
+}
+
+/* ===========================
+MAIN
+=========================== */
+
+.main{
+
+margin-left:250px;
+width:calc(100% - 250px);
+
+}
+
+/* ===========================
+TOP BAR
+=========================== */
+
+.topbar{
+
+height:80px;
+background:#0d1528;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:0 30px;
+border-bottom:1px solid #1e293b;
+
+}
+
+.welcome h2{
+
+font-size:24px;
+
+}
+
+.welcome p{
+
+color:#94a3b8;
+margin-top:5px;
+
+}
+
+.profile{
+
+background:#111827;
+padding:10px 18px;
+border-radius:30px;
+
+}
+
+.content{
+
+padding:30px;
+
+}
+
+.card{
+
+background:#111827;
+border-radius:18px;
+padding:20px;
+box-shadow:0 0 20px rgba(0,183,255,.15);
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<div class="logo">
+
+Saint<span>ScalperFX</span>
+
+</div>
+
+<div class="menu">
+
+<a class="active" href="/dashboard">
+🏠 Dashboard
+</a>
+
+<a href="/analysis">
+🤖 AI Analysis
+</a>
+
+<a href="/signals">
+📈 Signals
+</a>
+
+<a href="/history">
+📜 History
+</a>
+
+<a href="/journal">
+📖 Journal
+</a>
+
+<a href="/risk">
+💰 Risk
+</a>
+
+<a href="/settings">
+⚙ Settings
+</a>
+
+<a href="/profile">
+👤 Profile
+</a>
+
+<a href="/subscription">
+💎 Premium
+</a>
+
+<a href="/logout">
+🚪 Logout
+</a>
+
+</div>
+
+</div>
+
+<div class="main">
+
+<div class="topbar">
+
+<div class="welcome">
+
+<h2>
+Welcome back, {{ username }}
+</h2>
+
+<p>
+Professional AI Trading Terminal
+</p>
+
+</div>
+
+<div class="profile">
+
+🟢 AI ONLINE
+
+</div>
+
+</div>
+
+<div class="content">
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;">
+
+<div class="card">
+
+<div style="color:#94a3b8;font-size:13px;">
+AI STATUS
+</div>
+
+<h2 style="margin-top:10px;color:#00ff88;">
+ONLINE
+</h2>
+
+</div>
+
+<div class="card">
+
+<div style="color:#94a3b8;font-size:13px;">
+MT5
+</div>
+
+<h2 style="margin-top:10px;color:#00ff88;">
+CONNECTED
+</h2>
+
+</div>
+
+<div class="card">
+
+<div style="color:#94a3b8;font-size:13px;">
+MARKET
+</div>
+
+<h2 style="margin-top:10px;">
+XAUUSD
+</h2>
+
+</div>
+
+<div class="card">
+
+<div style="color:#94a3b8;font-size:13px;">
+SESSION
+</div>
+
+<h2 style="margin-top:10px;color:#ffd54f;">
+LONDON
+</h2>
+
+</div>
+
+</div>
+
+<br>
+
+<div class="card">
+
+<h2>
+📊 Latest AI Signal
+</h2>
+
+<div style="margin-top:25px;font-size:48px;font-weight:bold;color:#00b7ff;">
+
+{{ last_signal }}
+
+</div>
+
+<p style="margin-top:15px;color:#94a3b8;">
+
+Last Analysis
+
+</p>
+
+<p>
+
+{{ last_date }}
+
+</p>
+
+<br>
+
+<div style="height:14px;background:#1f2937;border-radius:30px;overflow:hidden;">
+
+<div style="height:100%;width:92%;background:linear-gradient(90deg,#00b7ff,#00ff88);"></div>
+
+</div>
+
+<p style="margin-top:12px;">
+
+Confidence
+<b>92%</b>
+
+</p>
+
+</div>
+
+<br>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+
+<div class="card">
+
+<h2>📷 AI Screenshot Analysis</h2>
+
+<br>
+
+<form
+action="/upload"
+method="POST"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="image"
+required
+style="
+width:100%;
+padding:15px;
+background:#1f2937;
+border:none;
+border-radius:12px;
+color:white;
+">
+
+<br><br>
+
+<button
+type="submit"
+style="
+width:100%;
+padding:16px;
+background:#00b7ff;
+border:none;
+border-radius:12px;
+color:white;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+">
+
+🚀 Analyze Screenshot
+
+</button>
+
+</form>
+
+</div>
+
+<div class="card">
+
+<h2>📊 Trading Statistics</h2>
+
+<br>
+
+<p>Total Analyses:
+<b>{{ total }}</b></p>
+
+<br>
+
+<p style="color:#00ff88;">
+BUY Signals:
+<b>{{ buy_count }}</b>
+</p>
+
+<br>
+
+<p style="color:#ff4d4d;">
+SELL Signals:
+<b>{{ sell_count }}</b>
+</p>
+
+<br>
+
+<p style="color:#ffd54f;">
+WAIT Signals:
+<b>{{ wait_count }}</b>
+</p>
+
+<br>
+
+<p>
+Most Common:
+<b>{{ most_common }}</b>
+</p>
+
+</div>
+
+</div>
+
+<br>
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;">
+
+<a href="/history" style="text-decoration:none;">
+<div class="card" style="text-align:center;cursor:pointer;">
+<h3>📜</h3>
+<p>History</p>
+</div>
+</a>
+
+<a href="/risk" style="text-decoration:none;">
+<div class="card" style="text-align:center;cursor:pointer;">
+<h3>💰</h3>
+<p>Risk</p>
+</div>
+</a>
+
+<a href="/settings" style="text-decoration:none;">
+<div class="card" style="text-align:center;cursor:pointer;">
+<h3>⚙️</h3>
+<p>Settings</p>
+</div>
+</a>
+
+<a href="/subscription" style="text-decoration:none;">
+<div class="card" style="text-align:center;cursor:pointer;">
+<h3>💎</h3>
+<p>Premium</p>
+</div>
+</a>
+
+</div>
+
+<br>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+
+<div class="card">
+
+<h2>🌍 Live Market Watch</h2>
+
+<br>
+
+<p>🥇 XAUUSD <span style="float:right;color:#00ff88;">Bullish</span></p>
+<hr style="border-color:#1f2937;margin:12px 0;">
+
+<p>₿ BTCUSD <span style="float:right;color:#ff4d4d;">Bearish</span></p>
+<hr style="border-color:#1f2937;margin:12px 0;">
+
+<p>🇺🇸 NAS100 <span style="float:right;color:#00ff88;">Bullish</span></p>
+<hr style="border-color:#1f2937;margin:12px 0;">
+
+<p>🇺🇸 US30 <span style="float:right;color:#ffd54f;">Waiting</span></p>
+
+</div>
+
+<div class="card">
+
+<h2>🧠 AI Brain Status</h2>
+
+<br>
+
+<p>Trend Engine
+<span style="float:right;color:#00ff88;">✔</span>
+</p>
+
+<hr style="border-color:#1f2937;margin:12px 0;">
+
+<p>SMC Engine
+<span style="float:right;color:#00ff88;">✔</span>
+</p>
+
+<hr style="border-color:#1f2937;margin:12px 0;">
+
+<p>ICT Engine
+<span style="float:right;color:#00ff88;">✔</span>
+</p>
+
+<hr style="border-color:#1f2937;margin:12px 0;">
+
+<p>Liquidity Engine
+<span style="float:right;color:#00ff88;">✔</span>
+</p>
+
+<hr style="border-color:#1f2937;margin:12px 0;">
+
+<p>Order Blocks
+<span style="float:right;color:#00ff88;">✔</span>
+</p>
+
+<hr style="border-color:#1f2937;margin:12px 0;">
+
+<p>Fair Value Gaps
+<span style="float:right;color:#00ff88;">✔</span>
+</p>
+
+</div>
+
+</div>
+
+<br>
+
+<div style="text-align:center;color:#64748b;padding:30px;">
+
+SaintScalperFX Professional AI Trading Platform
+
+<br><br>
+
+Version 3.0
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+
+</html>

@@ -1,198 +1,389 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SaintScalperFX Dashboard</title>
-    <link rel="stylesheet" href="/static/style.css">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SaintScalperFX</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+
+background:#050b18;
+color:white;
+
+}
+
+.header{
+
+padding:25px;
+background:linear-gradient(90deg,#0b1325,#10203d);
+
+}
+
+.logo{
+
+font-size:32px;
+font-weight:bold;
+
+}
+
+.subtitle{
+
+margin-top:8px;
+color:#9ca3af;
+
+}
+
+.container{
+
+padding:20px;
+
+}
+
+.card{
+
+background:#111827;
+border-radius:18px;
+padding:20px;
+margin-bottom:18px;
+box-shadow:0 0 18px rgba(0,183,255,.15);
+
+}
+
+.grid{
+
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+
+}
+
+.small{
+
+padding:18px;
+text-align:center;
+
+}
+
+.title{
+
+color:#9ca3af;
+font-size:13px;
+
+}
+
+.value{
+
+margin-top:10px;
+font-size:24px;
+font-weight:bold;
+
+}
+
+.buy{
+
+color:#00ff88;
+
+}
+
+.sell{
+
+color:#ff4d4d;
+
+}
+
+.wait{
+
+color:#ffd54f;
+
+}
+
+.signal{
+
+font-size:40px;
+font-weight:bold;
+margin-top:10px;
+color:#00b7ff;
+
+}
+
+.progress{
+
+height:12px;
+background:#1f2937;
+border-radius:20px;
+overflow:hidden;
+margin-top:15px;
+
+}
+
+.progress div{
+
+height:100%;
+width:92%;
+background:linear-gradient(90deg,#00b7ff,#00ff88);
+
+}
+
+.button{
+
+display:block;
+width:100%;
+padding:16px;
+border-radius:14px;
+background:#00b7ff;
+text-align:center;
+text-decoration:none;
+color:white;
+font-weight:bold;
+margin-top:14px;
+
+}
+
+.button:hover{
+
+background:#0098d8;
+
+}
+
+.upload{
+
+width:100%;
+padding:15px;
+background:#1f2937;
+border-radius:12px;
+border:none;
+color:white;
+
+}
+
+.footer{
+
+text-align:center;
+margin-top:25px;
+color:#6b7280;
+font-size:12px;
+
+}
+
+</style>
+
 </head>
 
 <body>
 
+<div class="header">
+
+<div class="logo">
+
+📈 SaintScalperFX
+
+</div>
+
+<div class="subtitle">
+
+Welcome back,
+<b>{{ username }}</b>
+
+</div>
+
+</div>
+
 <div class="container">
 
-<div class="topbar">
-    <div>
-        <h1>🧠 SaintScalperFX AI</h1>
-        <p class="subtitle">Professional Multi-Engine Trading Platform</p>
-    </div>
+<div class="grid">
 
-    <div class="userbox">
-        <h3>{{ username }}</h3>
-        <p>FREE PLAN</p>
-    </div>
+<div class="card small">
+
+<div class="title">
+
+AI STATUS
+
 </div>
 
-<div class="stats">
+<div class="value buy">
 
-<div class="stat-card buy">
-<h2>📈 BUY</h2>
-<h1>{{ buy_count }}</h1>
+ONLINE
+
 </div>
 
-<div class="stat-card sell">
-<h2>📉 SELL</h2>
-<h1>{{ sell_count }}</h1>
 </div>
 
-<div class="stat-card wait">
-<h2>⏳ WAIT</h2>
-<h1>{{ wait_count }}</h1>
+<div class="card small">
+
+<div class="title">
+
+MT5
+
 </div>
 
-<div class="stat-card total">
-<h2>📊 TOTAL</h2>
-<h1>{{ total }}</h1>
+<div class="value buy">
+
+CONNECTED
+
 </div>
+
+</div>
+
+<div class="card small">
+
+<div class="title">
+
+MARKET
+
+</div>
+
+<div class="value">
+
+XAUUSD
+
+</div>
+
+</div>
+
+<div class="card small">
+
+<div class="title">
+
+SESSION
+
+</div>
+
+<div class="value">
+
+LONDON
+
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>Latest Signal</h2>
+
+<div class="signal">
+
+{{ last_signal }}
+
+</div>
+
+<p style="margin-top:10px;color:#9ca3af;">
+
+{{ last_date }}
+
+</p>
+
+<div class="progress">
+
+<div></div>
+
+</div>
+
+<p style="margin-top:10px;">
+
+Confidence: <b>92%</b>
+
+</p>
 
 </div>
 
 <div class="card">
 
-<h2>🧠 AI Brain Status</h2>
+<h2>Trading Statistics</h2>
 
-<table class="summary-table">
+<br>
 
-<tr>
-<td>Brain Status</td>
-<td>🟢 ONLINE</td>
-</tr>
+<p>Total Analyses: <b>{{ total }}</b></p>
 
-<tr>
-<td>Trend Engine</td>
-<td>✅ ACTIVE</td>
-</tr>
+<br>
 
-<tr>
-<td>Structure Engine</td>
-<td>✅ ACTIVE</td>
-</tr>
+<p style="color:#00ff88;">
+BUY Signals:
+{{ buy_count }}
+</p>
 
-<tr>
-<td>Liquidity Engine</td>
-<td>✅ ACTIVE</td>
-</tr>
+<br>
 
-<tr>
-<td>FVG Engine</td>
-<td>✅ ACTIVE</td>
-</tr>
+<p style="color:#ff4d4d;">
+SELL Signals:
+{{ sell_count }}
+</p>
 
-<tr>
-<td>Order Block Engine</td>
-<td>✅ ACTIVE</td>
-</tr>
+<br>
 
-<tr>
-<td>ICT Engine</td>
-<td>✅ ACTIVE</td>
-</tr>
+<p style="color:#ffd54f;">
+WAIT Signals:
+{{ wait_count }}
+</p>
 
-<tr>
-<td>SMC Engine</td>
-<td>✅ ACTIVE</td>
-</tr>
-
-<tr>
-<td>Latest Signal</td>
-<td>{{ last_signal }}</td>
-</tr>
-
-<tr>
-<td>Most Common Signal</td>
-<td>{{ most_common }}</td>
-</tr>
-
-</table>
 </div>
 
-<div class="card">
+<form
+action="/upload"
+method="POST"
+enctype="multipart/form-data">
 
-<h2>📤 Upload Trading Chart</h2>
+<input
+class="upload"
+type="file"
+name="image"
+required>
 
-<form action="/upload" method="POST" enctype="multipart/form-data">
+<button
+class="button"
+type="submit">
 
-<input type="file" name="image" required>
+📷 Analyze Screenshot
 
-<br><br>
-
-<button type="submit">
-🚀 Analyze Chart
 </button>
 
 </form>
 
-</div><div class="card">
+<a class="button" href="/history">
 
-<h2>⚡ Quick Actions</h2>
+📜 Trade History
 
-<div class="actions">
-
-<a href="/history">
-<button class="action-btn">
-📜 Analysis History
-</button>
 </a>
 
-<a href="/risk">
-<button class="action-btn">
-🧮 Risk Calculator
-</button>
+<a class="button" href="/risk">
+
+💰 Risk Calculator
+
 </a>
 
-<a href="/settings">
-<button class="action-btn">
-⚙️ Settings
-</button>
+<a class="button" href="/settings">
+
+<a href="/control">
+    <button>🎛 Trading Control</button>
 </a>
 
-<a href="/logout">
-<button class="action-btn logout">
+⚙ Settings
+
+</a>
+
+<a class="button" href="/logout">
+
 🚪 Logout
-</button>
+
 </a>
 
-</div>
+<div class="footer">
 
-</div>
+SaintScalperFX AI Engine<br>
 
-<div class="card">
-
-<h2>📈 Trading Summary</h2>
-
-<table class="summary-table">
-
-<tr>
-<td>Total Analyses</td>
-<td>{{ total }}</td>
-</tr>
-
-<tr>
-<td>BUY Signals</td>
-<td>{{ buy_count }}</td>
-</tr>
-
-<tr>
-<td>SELL Signals</td>
-<td>{{ sell_count }}</td>
-</tr>
-
-<tr>
-<td>WAIT Signals</td>
-<td>{{ wait_count }}</td>
-</tr>
-
-<tr>
-<td>Most Common Signal</td>
-<td>{{ most_common }}</td>
-</tr>
-
-<tr>
-<td>Latest Signal</td>
-<td>{{ last_signal }}</td>
-</tr>
-
-</table>
+Version 2.0
 
 </div>
 

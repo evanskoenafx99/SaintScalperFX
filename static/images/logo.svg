@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+
+  <defs>
+
+    <linearGradient id="blue" x1="0%" y1="0%" x2="100%" y2="100%">
+
+      <stop offset="0%" stop-color="#00b7ff"/>
+
+      <stop offset="100%" stop-color="#0094d8"/>
+
+    </linearGradient>
+
+  </defs>
+
+  <!-- Background -->
+
+  <rect
+      x="20"
+      y="20"
+      width="472"
+      height="472"
+      rx="90"
+      fill="#08111f"/>
+
+  <!-- Rising Chart -->
+
+  <polyline
+      points="120,330 190,270 250,290 330,190 400,140"
+      fill="none"
+      stroke="url(#blue)"
+      stroke-width="22"
+      stroke-linecap="round"
+      stroke-linejoin="round"/>
+
+  <!-- Arrow -->
+
+  <polygon
+      points="385,115 432,120 408,162"
+      fill="#00b7ff"/>
+
+  <!-- Letters -->
+
+  <text
+      x="256"
+      y="420"
+      text-anchor="middle"
+      font-size="64"
+      font-family="Arial"
+      font-weight="bold"
+      fill="#ffffff">
+
+      SFX
+
+  </text>
+
+</svg>

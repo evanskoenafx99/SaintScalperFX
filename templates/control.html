@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>SaintScalperFX Control Center</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+
+<body style="background:#0b0f1a;color:white;font-family:Arial;padding:25px;">
+
+    <h1>⚙️ SaintScalperFX Control Center</h1>
+
+    <hr>
+
+    <form action="/control" method="POST">
+
+        <h2>Trading Mode</h2>
+
+        <label>
+            <input type="radio" name="mode" value="analysis" checked>
+            🟢 Analysis Only
+        </label>
+
+        <br><br>
+
+        <label>
+            <input type="radio" name="mode" value="confirm">
+            🔵 Confirm Before Trading
+        </label>
+
+        <br><br>
+
+        <label>
+            <input type="radio" name="mode" value="auto">
+            🔴 Full Auto Trading
+        </label>
+
+        <hr>
+
+        <h2>Risk Settings</h2>
+
+        Risk Per Trade (%)
+
+        <br>
+
+        <input type="number"
+               name="risk"
+               value="1"
+               min="0.1"
+               max="10"
+               step="0.1">
+
+        <br><br>
+
+        Maximum Open Trades
+
+        <br>
+
+        <input type="number"
+               name="max_trades"
+               value="3">
+
+        <br><br>
+
+        Minimum AI Confidence (%)
+
+        <br>
+
+        <input type="number"
+               name="confidence"
+               value="90">
+
+        <br><br>
+
+        <button type="submit">
+            💾 Save Settings
+        </button>
+
+    </form>
+
+</body>
+
+</html>

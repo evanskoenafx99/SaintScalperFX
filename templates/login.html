@@ -1,109 +1,173 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Login - SaintScalperFX AI</title>
+<title>SaintScalperFX</title>
 
-<link rel="stylesheet" href="/static/style.css">
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+background:#0a0f1f;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+background:linear-gradient(135deg,#08111f,#121d35,#0a0f1f);
+}
+
+.card{
+width:360px;
+background:#111827;
+padding:35px;
+border-radius:20px;
+box-shadow:0 0 35px rgba(0,170,255,.25);
+text-align:center;
+}
+
+.logo{
+font-size:42px;
+margin-bottom:10px;
+}
+
+h1{
+color:white;
+font-size:28px;
+margin-bottom:5px;
+}
+
+.subtitle{
+color:#9ca3af;
+font-size:14px;
+margin-bottom:30px;
+}
+
+input{
+width:100%;
+padding:15px;
+margin-bottom:15px;
+border:none;
+border-radius:12px;
+background:#1f2937;
+color:white;
+font-size:15px;
+outline:none;
+}
+
+input::placeholder{
+color:#9ca3af;
+}
+
+button{
+width:100%;
+padding:15px;
+border:none;
+border-radius:12px;
+background:#00b7ff;
+color:white;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+transition:.3s;
+}
+
+button:hover{
+background:#0095d8;
+}
+
+.links{
+margin-top:18px;
+}
+
+.links a{
+display:block;
+text-decoration:none;
+color:#00b7ff;
+margin-top:10px;
+font-size:14px;
+}
+
+.footer{
+margin-top:30px;
+color:#6b7280;
+font-size:12px;
+}
+
+.version{
+margin-top:8px;
+color:#00b7ff;
+font-size:12px;
+}
+
+</style>
 
 </head>
 
-
 <body>
-
-
-<div class="auth-container">
-
-
-<div class="auth-card">
-
-
-<div class="logo">
-
-<h1>🧠 SaintScalperFX</h1>
-
-<p>
-AI Trading Intelligence Platform
-</p>
-
-</div>
-
-
 
 <div class="card">
 
+<div class="logo">
+    <img
+        src="/static/images/logo.svg"
+        alt="SaintScalperFX"
+        style="width:90px;height:90px;">
+</div>
+<h1>SaintScalperFX</h1>
 
-<h2>
-🔐 Welcome Back
-</h2>
-
-
-<p class="subtitle">
-Login to access your AI trading dashboard
-</p>
-
-
+<div class="subtitle">
+AI Powered ICT Trading Assistant
+</div>
 
 <form method="POST">
 
-
-<label>Email Address</label>
-
-<input 
-type="email" 
-name="email" 
-placeholder="Enter your email"
+<input
+type="email"
+name="email"
+placeholder="Email Address"
 required>
 
-
-
-<label>Password</label>
-
-<input 
-type="password" 
-name="password" 
-placeholder="Enter your password"
+<input
+type="password"
+name="password"
+placeholder="Password"
 required>
-
-
 
 <button type="submit">
-
-🚀 Login
-
+SIGN IN
 </button>
-
 
 </form>
 
-
-
-<br>
-
-
-<p class="subtitle">
-
-New trader?
+<div class="links">
 
 <a href="/signup">
-Create account
+Create Account
 </a>
 
-</p>
-
-
-</div>
-
+<a href="#">
+Forgot Password?
+</a>
 
 </div>
 
-
+<div class="footer">
+Professional AI Trading Platform
 </div>
 
+<div class="version">
+Version 1.0
+</div>
+
+</div>
 
 </body>
-
 </html>

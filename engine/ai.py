@@ -1,7 +1,8 @@
+from datetime import datetime
+
 from engine.debug_console import DebugConsole
 from engine.decision_logger import DecisionLogger
-from datetime import datetime
-logger = DecisionLogger()
+
 from engine.trend import analyze as trend_analyze
 from engine.structure import analyze as structure_analyze
 from engine.liquidity import analyze as liquidity_analyze
@@ -12,6 +13,8 @@ from engine.smc import analyze as smc_analyze
 from engine.sessions import analyze as session_analyze
 from engine.risk import analyze as risk_analyze
 from engine.confidence import calculate
+
+logger = DecisionLogger()
 
 
 class SaintScalperBrain:
@@ -60,49 +63,49 @@ class SaintScalperBrain:
             if r.get("signal") == "SELL"
         )
 
-buy_votes = sum(
-    1 for r in results
-    if r.get("signal") == "BUY"
-)
+        buy_votes = sum(
+            1 for r in results
+            if r.get("signal") == "BUY"
+        )
 
-sell_votes = sum(
-    1 for r in results
-    if r.get("signal") == "SELL"
-)
+        sell_votes = sum(
+            1 for r in results
+            if r.get("signal") == "SELL"
+        )
 
-MINIMUM_AGREEMENT = 5
+        MINIMUM_AGREEMENT = 5
 
-if buy_votes >= MINIMUM_AGREEMENT and buy_score > sell_score:
-    signal = "BUY"
+        if buy_votes >= MINIMUM_AGREEMENT and buy_score > sell_score:
+            signal = "BUY"
+        elif sell_votes >= MINIMUM_AGREEMENT and sell_score > buy_score:
+            signal = "SELL"
+        else:
+            signal = "WAIT"
 
-elif sell_votes >= MINIMUM_AGREEMENT and sell_score > buy_score:
-    signal = "SELL"
+        logger.save({
+            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "symbol": "UNKNOWN",
+            "timeframe": "UNKNOWN",
+            "signal": signal,
+            "confidence": confidence["confidence"],
+            "grade": confidence["grade"],
+            "buy_score": buy_score,
+            "sell_score": sell_score,
+            "engines": results,
+            "reason": "Multi-engine ICT + SMC analysis completed.",
+            "entry": None,
+            "stop_loss": None,
+            "take_profit": None
+        })
 
-else:
-    signal = "WAIT"
-logger.save({
-    "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-    "symbol": symbol if "symbol" in locals() else "UNKNOWN",
-    "timeframe": timeframe if "timeframe" in locals() else "UNKNOWN",
-    "signal": signal,
-    "confidence": confidence["confidence"],
-    "grade": confidence["grade"],
-    "buy_score": buy_score,
-    "sell_score": sell_score,
-    "engines": results,
-   "reason": "Multi-engine ICT + SMC analysis completed.",
-"entry": entry if "entry" in locals() else None,
-"stop_loss": stop_loss if "stop_loss" in locals() else None,
-"take_profit": take_profit if "take_profit" in locals() else None
-})
+        DebugConsole.show(
+            results=results,
+            signal=signal,
+            confidence=confidence["confidence"],
+            buy_score=buy_score,
+            sell_score=sell_score
+        )
 
-  DebugConsole.show(
-    results=results,
-    signal=signal,
-    confidence=confidence["confidence"],
-    buy_score=buy_score,
-    sell_score=sell_score
-)
         return {
             "signal": signal,
             "confidence": confidence["confidence"],

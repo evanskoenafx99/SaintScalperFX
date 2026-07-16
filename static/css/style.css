@@ -1,0 +1,255 @@
+/* =========================================
+   SaintScalperFX Professional Theme
+========================================= */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+:root{
+
+--bg:#050b18;
+--card:#111827;
+--card2:#172033;
+
+--primary:#00b7ff;
+--primary-dark:#0094d8;
+
+--success:#00ff88;
+--danger:#ff4d4d;
+--warning:#ffd54f;
+
+--text:#ffffff;
+--text2:#9ca3af;
+
+--radius:18px;
+
+}
+
+body{
+
+background:var(--bg);
+color:var(--text);
+
+}
+
+/* =====================
+Cards
+===================== */
+
+.card{
+
+background:var(--card);
+
+border-radius:var(--radius);
+
+padding:20px;
+
+box-shadow:
+0 0 25px rgba(0,183,255,.12);
+
+transition:.3s;
+
+}
+
+.card:hover{
+
+transform:translateY(-4px);
+
+box-shadow:
+0 0 35px rgba(0,183,255,.22);
+
+}
+
+/* =====================
+Buttons
+===================== */
+
+.btn{
+
+display:inline-block;
+
+padding:15px 22px;
+
+border-radius:14px;
+
+text-decoration:none;
+
+border:none;
+
+background:var(--primary);
+
+color:white;
+
+font-size:15px;
+
+font-weight:bold;
+
+cursor:pointer;
+
+transition:.3s;
+
+}
+
+.btn:hover{
+
+background:var(--primary-dark);
+
+}
+
+/* =====================
+Inputs
+===================== */
+
+input,
+select,
+textarea{
+
+width:100%;
+
+padding:15px;
+
+background:#1f2937;
+
+border:none;
+
+border-radius:12px;
+
+color:white;
+
+outline:none;
+
+}
+
+input::placeholder{
+
+color:var(--text2);
+
+}
+
+/* =====================
+Titles
+===================== */
+
+h1{
+
+font-size:32px;
+
+}
+
+h2{
+
+font-size:24px;
+
+}
+
+p{
+
+color:var(--text2);
+
+}
+
+/* =====================
+Badges
+===================== */
+
+.badge-buy{
+
+background:rgba(0,255,136,.15);
+
+color:var(--success);
+
+padding:8px 14px;
+
+border-radius:30px;
+
+font-weight:bold;
+
+}
+
+.badge-sell{
+
+background:rgba(255,77,77,.15);
+
+color:var(--danger);
+
+padding:8px 14px;
+
+border-radius:30px;
+
+font-weight:bold;
+
+}
+
+.badge-wait{
+
+background:rgba(255,213,79,.15);
+
+color:var(--warning);
+
+padding:8px 14px;
+
+border-radius:30px;
+
+font-weight:bold;
+
+}
+
+/* =====================
+Grid
+===================== */
+
+.grid{
+
+display:grid;
+
+gap:20px;
+
+}
+
+.grid-2{
+
+grid-template-columns:repeat(2,1fr);
+
+}
+
+.grid-3{
+
+grid-template-columns:repeat(3,1fr);
+
+}
+
+.grid-4{
+
+grid-template-columns:repeat(4,1fr);
+
+}
+
+/* =====================
+Responsive
+===================== */
+
+@media(max-width:900px){
+
+.grid-4{
+
+grid-template-columns:1fr 1fr;
+
+}
+
+}
+
+@media(max-width:650px){
+
+.grid-4,
+.grid-3,
+.grid-2{
+
+grid-template-columns:1fr;
+
+}
+
+}
