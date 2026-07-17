@@ -1,6 +1,11 @@
 __pycache__/
 *.pyc
+
 uploads/
 logs/
+
+*.zip
+*.db
 *.db-journal
+
 .env

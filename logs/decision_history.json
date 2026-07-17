@@ -503,5 +503,205 @@
         "entry": null,
         "stop_loss": null,
         "take_profit": null
+    },
+    {
+        "time": "2026-07-16 11:17:08",
+        "symbol": "UNKNOWN",
+        "timeframe": "UNKNOWN",
+        "signal": "BUY",
+        "confidence": 75,
+        "grade": "B",
+        "buy_score": 103,
+        "sell_score": 18,
+        "engines": [
+            {
+                "engine": "Trend",
+                "signal": "BUY",
+                "score": 18,
+                "confidence": 90,
+                "reason": "Price is above the 20 candle equilibrium.",
+                "trend": "Bullish",
+                "bias": "BUYING PRESSURE"
+            },
+            {
+                "engine": "Structure",
+                "signal": "BUY",
+                "score": 25,
+                "confidence": 95,
+                "reason": "Bullish BOS detected.",
+                "structure": "Bullish",
+                "bos": true,
+                "choch": false
+            },
+            {
+                "engine": "Liquidity",
+                "signal": "SELL",
+                "score": 18,
+                "confidence": 90,
+                "reason": "Buy-side liquidity sweep detected."
+            },
+            {
+                "engine": "FVG",
+                "signal": "WAIT",
+                "score": 8,
+                "confidence": 40,
+                "reason": "No Fair Value Gap detected.",
+                "type": "None"
+            },
+            {
+                "engine": "Order Blocks",
+                "signal": "WAIT",
+                "score": 8,
+                "confidence": 40,
+                "reason": "No Order Block detected.",
+                "type": "None"
+            },
+            {
+                "engine": "ICT",
+                "signal": "BUY",
+                "score": 20,
+                "confidence": 60,
+                "reason": "Bullish BOS, Liquidity sweep against bias",
+                "bos": true,
+                "choch": false,
+                "liquidity": true,
+                "fvg": false,
+                "orderblock": false
+            },
+            {
+                "engine": "SMC",
+                "signal": "BUY",
+                "score": 20,
+                "confidence": 60,
+                "reason": "Bullish BOS, Liquidity sweep against bias",
+                "bos": true,
+                "choch": false,
+                "liquidity": true,
+                "fvg": false,
+                "orderblock": false
+            },
+            {
+                "engine": "Sessions",
+                "signal": "WAIT",
+                "score": 15,
+                "confidence": 80,
+                "reason": "Current session: London",
+                "session": "London"
+            },
+            {
+                "engine": "Risk",
+                "signal": "BUY",
+                "score": 20,
+                "confidence": 100,
+                "reason": "Risk parameters are acceptable.",
+                "risk_percent": 1.0,
+                "max_daily_loss": 3.0,
+                "risk_reward": "1:3"
+            }
+        ],
+        "reason": "Multi-engine ICT + SMC analysis completed.",
+        "entry": null,
+        "stop_loss": null,
+        "take_profit": null
+    },
+    {
+        "time": "2026-07-16 14:23:28",
+        "symbol": "UNKNOWN",
+        "timeframe": "UNKNOWN",
+        "signal": "BUY",
+        "confidence": 75,
+        "grade": "B",
+        "buy_score": 103,
+        "sell_score": 18,
+        "engines": [
+            {
+                "engine": "Trend",
+                "signal": "BUY",
+                "score": 18,
+                "confidence": 90,
+                "reason": "Price is above the 20 candle equilibrium.",
+                "trend": "Bullish",
+                "bias": "BUYING PRESSURE"
+            },
+            {
+                "engine": "Structure",
+                "signal": "BUY",
+                "score": 25,
+                "confidence": 95,
+                "reason": "Bullish BOS detected.",
+                "structure": "Bullish",
+                "bos": true,
+                "choch": false
+            },
+            {
+                "engine": "Liquidity",
+                "signal": "SELL",
+                "score": 18,
+                "confidence": 90,
+                "reason": "Buy-side liquidity sweep detected."
+            },
+            {
+                "engine": "FVG",
+                "signal": "WAIT",
+                "score": 8,
+                "confidence": 40,
+                "reason": "No Fair Value Gap detected.",
+                "type": "None"
+            },
+            {
+                "engine": "Order Blocks",
+                "signal": "WAIT",
+                "score": 8,
+                "confidence": 40,
+                "reason": "No Order Block detected.",
+                "type": "None"
+            },
+            {
+                "engine": "ICT",
+                "signal": "BUY",
+                "score": 20,
+                "confidence": 60,
+                "reason": "Bullish BOS, Liquidity sweep against bias",
+                "bos": true,
+                "choch": false,
+                "liquidity": true,
+                "fvg": false,
+                "orderblock": false
+            },
+            {
+                "engine": "SMC",
+                "signal": "BUY",
+                "score": 20,
+                "confidence": 60,
+                "reason": "Bullish BOS, Liquidity sweep against bias",
+                "bos": true,
+                "choch": false,
+                "liquidity": true,
+                "fvg": false,
+                "orderblock": false
+            },
+            {
+                "engine": "Sessions",
+                "signal": "WAIT",
+                "score": 15,
+                "confidence": 80,
+                "reason": "Current session: New York",
+                "session": "New York"
+            },
+            {
+                "engine": "Risk",
+                "signal": "BUY",
+                "score": 20,
+                "confidence": 100,
+                "reason": "Risk parameters are acceptable.",
+                "risk_percent": 1.0,
+                "max_daily_loss": 3.0,
+                "risk_reward": "1:3"
+            }
+        ],
+        "reason": "Multi-engine ICT + SMC analysis completed.",
+        "entry": null,
+        "stop_loss": null,
+        "take_profit": null
     }
 ]

@@ -1,12 +1,11 @@
 //+------------------------------------------------------------------+
-//|                 SaintScalperFX AI Client                         |
-//|          Communication Library (Version 1.0)                     |
+//|                  SaintScalperFX AI Client V2                     |
+//|            Communication Layer for SaintBridge                   |
 //+------------------------------------------------------------------+
 #pragma once
 
 class AIClient
 {
-
 private:
 
    string ServerURL;
@@ -18,13 +17,23 @@ public:
       ServerURL = url;
    }
 
+   //====================================================
+   // CONNECT
+   //====================================================
+
    bool Connect()
    {
-      Print("Connecting to SaintBridge...");
-      Print("Server: ", ServerURL);
+      Print("========================================");
+      Print(" SaintScalperFX AI Client");
+      Print(" Connected to: ", ServerURL);
+      Print("========================================");
 
       return true;
    }
+
+   //====================================================
+   // SEND MARKET DATA
+   //====================================================
 
    bool SendMarketData(
       string symbol,
@@ -33,36 +42,64 @@ public:
       double ask
    )
    {
+      Print("----------- MARKET -----------");
+      Print("Symbol      : ", symbol);
+      Print("Timeframe   : ", timeframe);
+      Print("Bid         : ", DoubleToString(bid,_Digits));
+      Print("Ask         : ", DoubleToString(ask,_Digits));
+      Print("------------------------------");
 
-      Print("--------------------------------");
-      Print("Sending Live Market Data");
-      Print("Symbol: ", symbol);
-      Print("Timeframe: ", timeframe);
-      Print("Bid: ", bid);
-      Print("Ask: ", ask);
-      Print("--------------------------------");
-
-      // HTTP request will be added here.
+      // HTTP POST to /market
+      // (Next version)
 
       return true;
-
    }
+
+   //====================================================
+   // SEND ACCOUNT DATA
+   //====================================================
+
+   bool SendAccountData()
+   {
+      double balance     = AccountInfoDouble(ACCOUNT_BALANCE);
+      double equity      = AccountInfoDouble(ACCOUNT_EQUITY);
+      double margin      = AccountInfoDouble(ACCOUNT_MARGIN);
+      double freeMargin  = AccountInfoDouble(ACCOUNT_MARGIN_FREE);
+      double profit      = AccountInfoDouble(ACCOUNT_PROFIT);
+      int openTrades     = PositionsTotal();
+
+      Print("----------- ACCOUNT ----------");
+      Print("Balance      : ", balance);
+      Print("Equity       : ", equity);
+      Print("Profit       : ", profit);
+      Print("Margin       : ", margin);
+      Print("Free Margin  : ", freeMargin);
+      Print("Open Trades  : ", openTrades);
+      Print("------------------------------");
+
+      // HTTP POST to /account
+      // (Next version)
+
+      return true;
+   }
+
+   //====================================================
+   // RECEIVE AI SIGNAL
+   //====================================================
 
    string GetSignal()
    {
-
-      // Later this will read JSON
-      // returned by SaintBridge.
+      // Future JSON response
 
       return "WAIT";
-
    }
+
+   //====================================================
+   // RECEIVE CONFIDENCE
+   //====================================================
 
    double GetConfidence()
    {
-
       return 0;
-
    }
-
 };
