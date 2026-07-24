@@ -1,98 +1,151 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+function MetricCard({
+  title,
+  value,
+}: {
+  title: string;
+  value: string;
+}) {
+  return (
+    <View style={styles.metricCard}>
+      <Text style={styles.metricTitle}>{title}</Text>
+      <Text style={styles.metricValue}>{value}</Text>
+    </View>
+  );
+}
 
 export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <ScrollView style={styles.container}>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <Text style={styles.title}>SaintScalperFX</Text>
+      <Text style={styles.subtitle}>AI Trading Engine</Text>
+
+      <View style={styles.aiCard}>
+
+        <Text style={styles.aiAvatar}>🤖</Text>
+
+        <Text style={styles.online}>🟢 AI ONLINE</Text>
+
+        <Text style={styles.signalLabel}>CURRENT SIGNAL</Text>
+
+        <Text style={styles.buy}>BUY</Text>
+
+        <Text style={styles.details}>
+          Symbol: XAUUSD{"\n"}
+          Timeframe: M5{"\n"}
+          Confidence: 94%
+        </Text>
+
+      </View>
+      <Text style={styles.section}>Trading Analytics</Text>
+
+      <View style={styles.grid}>
+        <MetricCard title="Balance" value="R180,000" />
+        <MetricCard title="Equity" value="R182,450" />
+        <MetricCard title="Today's Profit" value="+R3,250" />
+        <MetricCard title="Win Rate" value="78%" />
+        <MetricCard title="Drawdown" value="1.4%" />
+        <MetricCard title="Profit Factor" value="2.8" />
+      </View>
+
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+
+  container: {
+    flex: 1,
+    backgroundColor: "#050816",
+    padding: 20,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+
+  title: {
+    color: "#00AEEF",
+    fontSize: 32,
+    fontWeight: "bold",
+    marginTop: 40,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+
+  subtitle: {
+    color: "#8A94A6",
+    fontSize: 18,
+    marginBottom: 20,
   },
+
+  aiCard: {
+    backgroundColor: "#0B1228",
+    borderRadius: 24,
+    padding: 25,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#00AEEF",
+    marginBottom: 25,
+  },
+
+  aiAvatar: {
+    fontSize: 80,
+  },
+
+  online: {
+    color: "#00FF99",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 10,
+  },
+
+  signalLabel: {
+    color: "#9CA3AF",
+    marginTop: 20,
+  },
+
+  buy: {
+    color: "#00FF99",
+    fontSize: 42,
+    fontWeight: "bold",
+    marginTop: 8,
+  },
+
+  details: {
+    color: "#FFFFFF",
+    textAlign: "center",
+    fontSize: 16,
+    lineHeight: 28,
+    marginTop: 15,
+  },
+  section: {
+    color: "#FFFFFF",
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 15,
+  },
+
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+
+  metricCard: {
+    width: "48%",
+    backgroundColor: "#101827",
+    borderRadius: 18,
+    padding: 18,
+    marginBottom: 15,
+  },
+
+  metricTitle: {
+    color: "#9CA3AF",
+    fontSize: 14,
+  },
+
+  metricValue: {
+    color: "#00AEEF",
+    fontSize: 22,
+    fontWeight: "bold",
+    marginTop: 8,
+  },
+
 });
