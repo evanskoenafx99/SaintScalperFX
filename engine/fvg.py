@@ -21,7 +21,8 @@ def analyze(candles):
             "score": 18,
             "confidence": 90,
             "reason": "Bullish Fair Value Gap detected.",
-            "type": "Bullish"
+           "type": "Bullish",
+           "fvg": True
         }
 
     # Bearish Fair Value Gap
@@ -32,7 +33,8 @@ def analyze(candles):
             "score": 18,
             "confidence": 90,
             "reason": "Bearish Fair Value Gap detected.",
-            "type": "Bearish"
+           "type": "Bearish",
+           "fvg": True
         }
 
     return {
@@ -41,5 +43,6 @@ def analyze(candles):
         "score": 8,
         "confidence": 40,
         "reason": "No Fair Value Gap detected.",
-        "type": "None"
+        "type": "None",
+        "fvg": False
     }

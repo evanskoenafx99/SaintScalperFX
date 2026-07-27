@@ -18,11 +18,7 @@ def analyze(candles):
     previous_low = min(lows[:-1])
 
     current = candles[-1]
-    hh = highs[-1] > highs[-2]
-    hl = lows[-1] > lows[-2]
 
-    lh = highs[-1] < highs[-2]
-    ll = lows[-1] < lows[-2]
 
     bullish_bos = current["high"] > previous_high
     bearish_bos = current["low"] < previous_low
@@ -58,14 +54,8 @@ def analyze(candles):
             "reason": "Bullish BOS detected.",
             "structure": "Bullish",
             "bos": True,
-            "choch": choch,
-            "trend": "UPTREND",
-            "hh": hh,
-            "hl": hl,
-            "lh": lh,
-            "ll": ll,
+            "choch": choch
         }
-
 
 
     if bearish_bos:
@@ -78,14 +68,8 @@ def analyze(candles):
             "reason": "Bearish BOS detected.",
             "structure": "Bearish",
             "bos": True,
-            "choch": choch,
-            "trend": "DOWNTREND",
-            "hh": hh,
-            "hl": hl,
-            "lh": lh,
-            "ll": ll,
+            "choch": choch
         }
-
 
 
     return {
@@ -96,10 +80,5 @@ def analyze(candles):
         "reason": "No BOS or CHoCH detected.",
         "structure": "Sideways",
         "bos": False,
-        "choch": False,
-        "trend": "RANGING",
-        "hh": hh,
-        "hl": hl,
-        "lh": lh,
-        "ll": ll,
+        "choch": False
     }

@@ -20,7 +20,6 @@ double gridSize;
 input double gridSize_Spacing = 1;
 double LotSize;
 input double totalProfit_inCurrency = 1000;
-input double MagicNumber = 111;
 input string AI_URL = "http://127.0.0.1:5001/market";
 string AI_SIGNAL = "WAIT";
 datetime LastAIRequest = 0;
@@ -30,58 +29,66 @@ bool isTradeAllowed = true;
 int totalBars = 0;
 int handle;
 double maData[];
+//=============================================
+// SaintScalperFX Version 6
+// Live Candle Buffer
+//=============================================
+
+MqlRates CandleData[200];
+string CandleJSON = "";
 //+------------------------------------------------------------------+
-int OnInit(){
-
-
+int OnInit()
+{
    CREATETEXT();
 
-
    handle = iMA(_Symbol,_Period,66,0,MODE_SMA,PRICE_CLOSE);
-   Print(handle);
-   ArraySetAsSeries(maData,true);
-   
-   static bool isInit = false;
-   if(isInit){
-      isInit = true;
-  
-      
-      //cheak if licesing has expired
 
-      if(TimeCurrent() > StringToTime("2090.12.31 12:00")){
-         Print(__FUNCTION__," > License Is still Active...");
-      }else{
-         Print(__FUNCTION__," > License Is Not Active AnyMore...");
-         ExpertRemove();
-         return INIT_FAILED;
-
-      }
-      if(AccountInfoInteger(ACCOUNT_TRADE_MODE) == ACCOUNT_TRADE_MODE_DEMO){
-         Print(__FUNCTION__," > Demo Account Is Allowed...");
-      if(AccountInfoInteger(ACCOUNT_TRADE_MODE) == ACCOUNT_TRADE_MODE_REAL){
-         Print(__FUNCTION__," > Real Account Is Allowed...");   
-         }
-      }
+   if(handle == INVALID_HANDLE)
+   {
+      Print("Failed to create Moving Average handle.");
+      return INIT_FAILED;
    }
+
+   ArraySetAsSeries(maData,true);
+
+
+   Print("SaintScalperFX initialized successfully.");
+
+   if(TimeCurrent() > StringToTime("2090.12.31 12:00"))
+   {
+      Print("License expired.");
+      ExpertRemove();
+      return INIT_FAILED;
+   }
+
+   if(AccountInfoInteger(ACCOUNT_TRADE_MODE)==ACCOUNT_TRADE_MODE_DEMO)
+      Print("Running on Demo account.");
+
+   if(AccountInfoInteger(ACCOUNT_TRADE_MODE)==ACCOUNT_TRADE_MODE_REAL)
+      Print("Running on Real account.");
 
    return(INIT_SUCCEEDED);
 }
-
 void OnDeinit(const int reason){   
    
    
 }
 void OnTick(){
-   if(TimeCurrent() - LastAIRequest >= 60)
+ArraySetAsSeries(CandleData,true);
+CopyRates(_Symbol,_Period,0,200,CandleData);
+if(TimeCurrent() - LastAIRequest >= 60)
 {
-   AI_SIGNAL = "WAIT";
-
-   // Next step:
-   // This will become the HTTP request
-   // to SaintBridge.
-
+AI.SendMarketData(
+      _Symbol,
+      _Period,
+      SymbolInfoDouble(_Symbol,SYMBOL_BID),
+      SymbolInfoDouble(_Symbol,SYMBOL_ASK),
+      CandleData,
+      ArraySize(CandleData)
+   );
    LastAIRequest = TimeCurrent();
 }
+
       for(int i = PositionsTotal()-1; i >= 0; i--){    
      ulong posTicket = PositionGetTicket(i);
      if(PositionSelectByTicket(posTicket)){
@@ -146,23 +153,47 @@ void OnTick(){
    double ask = NormalizeDouble(SymbolInfoDouble(_Symbol,SYMBOL_ASK),_Digits);
    double bid = NormalizeDouble(SymbolInfoDouble(_Symbol,SYMBOL_BID),_Digits);
 
-   
-   if (PositionsTotal()==0 && low1 > maData[1] && low2 < maData[1] && isTradeAllowed){
+
+   if (PositionsTotal()==0 &&
+    AI.GetDecision()=="TRADE" &&
+    AI.GetSignal()=="BUY" &&
+    isTradeAllowed){   
    //buy
    Print("BUY");
    gridSize = ask + gridSize_Spacing;
    Print("Next Grid Size = ",gridSize,"SaintScalperFX AI");
-   TakeProfit = ask + takeProfitPts;
-   obj_Trade.Buy(intialLotsize,_Symbol,ask,0,TakeProfit,"SaintScalperFX AI");
+  double aiSL = AI.GetStopLoss();
+double aiTP = AI.GetTakeProfit();
+
+obj_Trade.Buy(
+   intialLotsize,
+   _Symbol,
+   ask,
+   aiSL,
+   aiTP,
+   "SaintScalperFX AI"
+);
    isTradeAllowed = false;
    }
-   else if (PositionsTotal()==0 && High1 > maData[1] && High2 < maData[1] && isTradeAllowed){
+   else if (PositionsTotal()==0 &&
+         AI.GetDecision()=="TRADE" &&
+         AI.GetSignal()=="SELL" &&
+         isTradeAllowed){
    //sell
    Print("SELL");
    gridSize = bid - gridSize_Spacing;
    Print("Next Grid Size = ",gridSize,"SaintScalperFX AI");
-   TakeProfit = bid - takeProfitPts;
-   obj_Trade.Sell(intialLotsize,_Symbol,bid,0,TakeProfit,"SaintScalperFX AI");
+  double aiSL = AI.GetStopLoss();
+double aiTP = AI.GetTakeProfit();
+
+obj_Trade.Sell(
+   intialLotsize,
+   _Symbol,
+   bid,
+   aiSL,
+   aiTP,
+   "SaintScalperFX AI"
+);
    isTradeAllowed = false;
    }
 
@@ -275,8 +306,13 @@ bool isNewsEventAhead(){
    return false;
 
 }
+//=============================================
+// SaintScalperFX Version 6
+// Live Candle Buffer
+//=============================================
 
-//------------------------------------------------------------------------
-//owned by Thema Billy Kgole
-//born:2004-12-16
-//in Alexandra Masakhanine Clinic
+//----------------------------------------------------->
+// End of SaintScalperFX EA PRO
+// AI Trading Engine
+// Copyright © 2026 SaintScalperFX
+//----------------------------------------------------->

@@ -2,6 +2,7 @@ import json
 import os
 from datetime import datetime
 
+
 LOG_FILE = "logs/decision_history.json"
 
 
@@ -10,6 +11,7 @@ class DecisionLogger:
     def __init__(self):
         os.makedirs("logs", exist_ok=True)
 
+
     def save(self, decision):
 
         entry = {
@@ -17,18 +19,29 @@ class DecisionLogger:
             **decision
         }
 
+
         history = []
 
+
         if os.path.exists(LOG_FILE):
-            with open(LOG_FILE, "r") as f:
-                try:
+
+            try:
+                with open(LOG_FILE, "r") as f:
                     history = json.load(f)
-                except:
-                    history = []
+
+            except Exception:
+                history = []
+
 
         history.append(entry)
 
+
         with open(LOG_FILE, "w") as f:
-            json.dump(history, f, indent=4)
+            json.dump(
+                history,
+                f,
+                indent=4
+            )
+
 
         print("Decision saved.")

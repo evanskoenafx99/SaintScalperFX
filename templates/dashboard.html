@@ -224,15 +224,28 @@ Professional AI Trading Terminal
 
 <div class="profile">
 
+{% if status.get("connected") %}
 🟢 AI ONLINE
+{% else %}
+🔴 AI OFFLINE
+{% endif %}
 
 </div>
-
 </div>
 
 <div class="content">
 
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;">
+<div class="card">
+
+<div style="color:#94a3b8;font-size:13px;">
+MARKET
+</div>
+
+<h2 style="margin-top:10px;">
+{{ market.get("market", {}).get("symbol", "--") }}
+</h2>
+
+</div>
 
 <div class="card">
 
@@ -243,6 +256,30 @@ AI STATUS
 <h2 style="margin-top:10px;color:#00ff88;">
 ONLINE
 </h2>
+
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:20px;">
+
+<div class="card">
+<div style="color:#94a3b8;font-size:13px;">BALANCE</div>
+<h2>${{ account.get("balance", "0.00") }}</h2>
+</div>
+
+<div class="card">
+<div style="color:#94a3b8;font-size:13px;">EQUITY</div>
+<h2>${{ account.get("equity", "0.00") }}</h2>
+</div>
+
+<div class="card">
+<div style="color:#94a3b8;font-size:13px;">PROFIT</div>
+<h2>${{ account.get("profit", "0.00") }}</h2>
+</div>
+
+<div class="card">
+<div style="color:#94a3b8;font-size:13px;">OPEN TRADES</div>
+<h2>{{ account.get("open_trades", 0) }}</h2>
+</div>
 
 </div>
 
@@ -260,13 +297,7 @@ CONNECTED
 
 <div class="card">
 
-<div style="color:#94a3b8;font-size:13px;">
-MARKET
-</div>
-
-<h2 style="margin-top:10px;">
-XAUUSD
-</h2>
+<	
 
 </div>
 

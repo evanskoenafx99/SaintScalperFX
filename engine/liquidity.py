@@ -26,7 +26,8 @@ def analyze(candles):
             "signal": "SELL",
             "score": 18,
             "confidence": 90,
-            "reason": "Buy-side liquidity sweep detected."
+           "reason": "Buy-side liquidity sweep detected.",
+           "liquidity": "BUY_SIDE",
         }
 
     if sell_sweep:
@@ -35,7 +36,8 @@ def analyze(candles):
             "signal": "BUY",
             "score": 18,
             "confidence": 90,
-            "reason": "Sell-side liquidity sweep detected."
+            "reason": "Sell-side liquidity sweep detected.",
+            "liquidity": "SELL_SIDE",
         }
 
     return {
@@ -43,5 +45,6 @@ def analyze(candles):
         "signal": "WAIT",
         "score": 8,
         "confidence": 40,
-        "reason": "No liquidity sweep detected."
+        "reason": "No liquidity sweep detected.",
+        "liquidity": "NONE",
     }

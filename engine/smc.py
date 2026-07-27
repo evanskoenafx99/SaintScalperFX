@@ -110,8 +110,13 @@ def analyze(candles):
         "bos": structure.get("bos", False),
         "choch": structure.get("choch", False),
 
-        "liquidity": liquidity.get("signal") != "WAIT",
-        "fvg": fvg.get("signal") != "WAIT",
-        "orderblock": orderblock.get("signal") != "WAIT"
+       "liquidity": liquidity.get("signal") != "WAIT",
+      "fvg": fvg.get("signal") != "WAIT",
+      "orderblock": orderblock.get("signal") != "WAIT",
+
+      "structure_signal": structure.get("signal"),
+      "liquidity_signal": liquidity.get("signal"),
+      "fvg_signal": fvg.get("signal"),
+      "orderblock_signal": orderblock.get("signal")
 
     }

@@ -1,7 +1,8 @@
 //+------------------------------------------------------------------+
-//|                 SaintScalperFX AI Client V3.0                    |
-//|               HTTP Communication Engine                          |
+//|                  SaintScalperFX AIClient V4                     |
+//|              Production HTTP Communication Layer                |
 //+------------------------------------------------------------------+
+#property strict
 #pragma once
 
 class AIClient
@@ -9,127 +10,275 @@ class AIClient
 private:
 
    string ServerURL;
-   char post[];
-   char result[];
-   string headers;
+
+   string LastDecision;
+   string LastSignal;
+   double LastConfidence;
+   double LastStopLoss;
+   double LastTakeProfit;
+
+
+   string EscapeJSON(string value)
+   {
+      StringReplace(value,"\\","\\\\");
+      StringReplace(value,"\"","\\\"");
+      return value;
+   }
+
 
 public:
 
-   AIClient(string url)
+AIClient()
+{
+   ServerURL = "http://127.0.0.1:5001/market";
+
+   LastSignal = "NONE";
+   LastConfidence = 0;
+   LastStopLoss = 0;
+   LastTakeProfit = 0;
+}
+
+
+AIClient(string url)
+{
+   ServerURL = url;
+
+   LastSignal = "NONE";
+   LastConfidence = 0;
+   LastStopLoss = 0;
+   LastTakeProfit = 0;
+}
+
+
+   void SetURL(string url)
    {
       ServerURL = url;
-      headers = "Content-Type: application/json\r\n";
    }
 
-   bool Connect()
-   {
-      Print("====================================");
-      Print(" SaintScalperFX AI Client V3");
-      Print(" Server : ",ServerURL);
-      Print("====================================");
-
-      return(true);
-   }
-
-   bool SendAccountData(
-      double balance,
-      double equity,
-      double margin,
-      double freeMargin,
-      double profit,
-      int openTrades
-   )
-   {
-      string json =
-      "{"
-      "\"balance\":"+DoubleToString(balance,2)+","
-      "\"equity\":"+DoubleToString(equity,2)+","
-      "\"margin\":"+DoubleToString(margin,2)+","
-      "\"free_margin\":"+DoubleToString(freeMargin,2)+","
-      "\"profit\":"+DoubleToString(profit,2)+","
-      "\"open_trades\":"+IntegerToString(openTrades)+
-      "}";
-
-      StringToCharArray(json,post);
-      ResetLastError();
-
-      int timeout = 5000;
-
-      string response_headers = "";
-
-      int res = WebRequest(
-         "POST",
-         ServerURL + "/account",
-         headers,
-         timeout,
-         post,
-         result,
-         response_headers
-      );
-
-      if(res == -1)
-      {
-         Print("ACCOUNT SEND FAILED : ", GetLastError());
-         return(false);
-      }
-
-      Print("Account synced.");
-
-      return(true);
-   }
 
    bool SendMarketData(
       string symbol,
-      string timeframe,
+      ENUM_TIMEFRAMES timeframe,
       double bid,
-      double ask
+      double ask,
+      MqlRates &candles[],
+      int candleCount
    )
    {
-      string json =
-      "{"
-      "\"symbol\":\""+symbol+"\","
-      "\"timeframe\":\""+timeframe+"\","
-      "\"bid\":"+DoubleToString(bid,_Digits)+","
-      "\"ask\":"+DoubleToString(ask,_Digits)+
-      "}";
+
+      string json="{";
+
+      json += "\"symbol\":\""+EscapeJSON(symbol)+"\",";
+      json += "\"timeframe\":\""+IntegerToString(timeframe)+"\",";
+      json += "\"bid\":"+DoubleToString(bid,Digits())+",";
+      json += "\"ask\":"+DoubleToString(ask,Digits())+",";
+
+
+      json += "\"candles\":[";
+
+
+      int limit=MathMin(candleCount,200);
+
+
+      for(int i=0;i<limit;i++)
+      {
+
+         if(i>0)
+            json+=",";
+
+
+         json+="{";
+
+         json+="\"time\":"+IntegerToString(candles[i].time)+",";
+         json+="\"open\":"+DoubleToString(candles[i].open,Digits())+",";
+         json+="\"high\":"+DoubleToString(candles[i].high,Digits())+",";
+         json+="\"low\":"+DoubleToString(candles[i].low,Digits())+",";
+         json+="\"close\":"+DoubleToString(candles[i].close,Digits())+",";
+         json+="\"volume\":"+IntegerToString(candles[i].tick_volume);
+
+         json+="}";
+
+      }
+
+
+      json+="]}";
+
+
+      char post[];
+      char result[];
+
+      string headers =
+      "Content-Type: application/json\r\n";
+
 
       StringToCharArray(json,post);
+Print("SAINT DEBUG candles sent: ", candleCount);
+Print("SAINT DEBUG JSON size: ", StringLen(json));
 
       ResetLastError();
 
-      int timeout = 5000;
 
-      string response_headers = "";
-
-      int res = WebRequest(
+      int response =
+      WebRequest(
          "POST",
-         ServerURL + "/market",
+         ServerURL,
          headers,
-         timeout,
+         10000,
          post,
          result,
-         response_headers
+         headers
       );
-      if(res == -1)
+
+
+      if(response==-1)
       {
-         Print("MARKET SEND FAILED : ", GetLastError());
-         return(false);
+         Print("AIClient V4 HTTP Error: ",
+               GetLastError());
+
+         return false;
       }
 
-      Print("Market synced.");
 
-      return(true);
+      string answer =
+      CharArrayToString(result);
+
+
+      ParseResponse(answer);
+
+
+      return true;
+
    }
+
+
+
+   void ParseResponse(string json)
+   {
+
+      LastDecision =
+      ExtractString(json,"decision");     
+
+      LastSignal =
+      ExtractString(json,"signal");
+
+
+      LastConfidence =
+      ExtractDouble(json,"confidence");
+
+
+      LastStopLoss =
+      ExtractDouble(json,"stop_loss");
+
+
+      LastTakeProfit =
+      ExtractDouble(json,"take_profit");
+
+   }
+
+
+
+   string ExtractString(string json,string key)
+   {
+
+      string search="\""+key+"\":\"";
+
+      int start=
+      StringFind(json,search);
+
+
+      if(start<0)
+         return "";
+
+
+      start += StringLen(search);
+
+
+      int end=
+      StringFind(json,"\"",start);
+
+
+      if(end<0)
+         return "";
+
+
+      return StringSubstr(
+         json,
+         start,
+         end-start
+      );
+
+   }
+
+
+
+   double ExtractDouble(string json,string key)
+   {
+
+      string search="\""+key+"\":"; 
+
+      int start=
+      StringFind(json,search);
+
+
+      if(start<0)
+         return 0;
+
+
+      start += StringLen(search);
+
+
+      int end=
+      StringFind(json,",",start);
+
+
+      if(end<0)
+         end=
+         StringFind(json,"}",start);
+
+
+      if(end<0)
+         return 0;
+
+
+      string value =
+      StringSubstr(
+         json,
+         start,
+         end-start
+      );
+
+
+      return StringToDouble(value);
+
+   }
+
+   string GetDecision()
+  {
+      return LastDecision;
+  }
 
    string GetSignal()
    {
-      return("WAIT");
+      return LastSignal;
    }
+
 
    double GetConfidence()
    {
-      return(0.0);
+      return LastConfidence;
    }
 
+
+   double GetStopLoss()
+   {
+      return LastStopLoss;
+   }
+
+
+   double GetTakeProfit()
+   {
+      return LastTakeProfit;
+   }
+
+
 };
-//+------------------------------------------------------------------+

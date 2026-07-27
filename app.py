@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory
 import sqlite3
 import os
+import requests
 
 from ai import analyze_chart
 from engine.candle_shapes import detect
@@ -19,6 +20,34 @@ def get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
+BRIDGE_URL = "http://127.0.0.1:5001"
+
+
+def bridge_get(endpoint):
+    try:
+        response = requests.get(
+            f"{BRIDGE_URL}/{endpoint}",
+            timeout=2
+        )
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        print(f"[Bridge Error] {e}")
+        return {}
+def get_ai_analysis():
+    try:
+        response = requests.get(
+            f"{BRIDGE_URL}/market",
+            timeout=2
+        )
+        response.raise_for_status()
+        data = response.json()
+
+        return data.get("analysis", {})
+
+    except Exception as e:
+        print(f"[AI Error] {e}")
+        return {}
 
 @app.route("/")
 def home():
@@ -67,6 +96,10 @@ def home():
     elif sell_count > buy_count and sell_count > wait_count:
         most_common = "SELL"
 
+    bridge_status = bridge_get("status")
+    market_data = bridge_get("market")
+    account_data = bridge_get("account")
+
     return render_template(
         "index.html",
         username=session["user"],
@@ -76,10 +109,12 @@ def home():
         buy_count=buy_count,
         sell_count=sell_count,
         wait_count=wait_count,
-        most_common=most_common
+        most_common=most_common,
+        status=bridge_status,
+        market=market_data,
+        account=account_data,
+        analysis=market_data.get("analysis", {})
     )
-
-
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
 

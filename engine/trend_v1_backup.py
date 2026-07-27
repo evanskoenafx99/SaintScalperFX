@@ -1,9 +1,5 @@
-from engine.candles import (
-    highest_high,
-    lowest_low,
-    last_close,
-    average_range
-)
+from engine.candles import highest_high, lowest_low, last_close
+
 
 def analyze(candles):
 
@@ -20,20 +16,15 @@ def analyze(candles):
 
 
     high = highest_high(candles, 20)
+
     low = lowest_low(candles, 20)
+
     close = last_close(candles)
+
+
     midpoint = (high + low) / 2
 
-    price_range = high - low
 
-    distance = abs(close - midpoint)
-
-    strength = "WEAK"
-
-    if distance > average_range(candles, 20):
-        strength = "STRONG"
-    elif distance > average_range(candles, 20) / 2:
-        strength = "MODERATE"
 
     if close > midpoint:
 
@@ -54,16 +45,8 @@ def analyze(candles):
             "Bullish",
 
             "bias":
-            "BUYING PRESSURE",
-           "equilibrium": midpoint,
+            "BUYING PRESSURE"
 
-           "close": close,
-
-           "zone": "PREMIUM",
-
-           "strength": strength,
-
-          "distance": distance,
         }
 
 
@@ -85,14 +68,6 @@ def analyze(candles):
         "Bearish",
 
         "bias":
-        "SELLING PRESSURE",
-       "equilibrium": midpoint,
+        "SELLING PRESSURE"
 
-       "close": close,
-
-       "zone": "DISCOUNT",
-
-       "strength": strength,
-
-       "distance": distance,
     }

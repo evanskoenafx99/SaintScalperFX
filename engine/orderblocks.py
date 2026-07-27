@@ -20,7 +20,8 @@ def analyze(candles):
             "score": 19,
             "confidence": 92,
             "reason": "Bullish Order Block confirmed.",
-            "type": "Bullish"
+            "type": "Bullish",
+            "order_block": True
         }
 
     # Bearish Order Block
@@ -31,7 +32,8 @@ def analyze(candles):
             "score": 19,
             "confidence": 92,
             "reason": "Bearish Order Block confirmed.",
-            "type": "Bearish"
+           "type": "Bearish",
+           "order_block": True
         }
 
     return {
@@ -40,5 +42,6 @@ def analyze(candles):
         "score": 8,
         "confidence": 40,
         "reason": "No Order Block detected.",
-        "type": "None"
+       "type": "None",
+       "order_block": False
     }
