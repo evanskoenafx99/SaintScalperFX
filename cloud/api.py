@@ -22,7 +22,7 @@ from werkzeug.security import (
 
 app = Flask(__name__)
 
-BRIDGE_URL = "http://127.0.0.1:5001"
+BRIDGE_URL = os.getenv("BRIDGE_URL", "http://127.0.0.1:5001")
 
 DATABASE = "users.db"
 
