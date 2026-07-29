@@ -1,6 +1,14 @@
 import sys
 import os
 import requests
+import sqlite3
+
+from flask import Flask, request, jsonify
+
+from werkzeug.security import (
+    generate_password_hash,
+    check_password_hash
+)
 
 sys.path.append(
     os.path.dirname(
@@ -10,14 +18,9 @@ sys.path.append(
     )
 )
 
-
-from flask import Flask, request, jsonify
-import sqlite3
-
-from werkzeug.security import (
-    generate_password_hash,
-    check_password_hash
-)
+from engine.ai import SaintScalperBrain
+from engine.price_risk import calculate
+from market_feed import get_market_data
 
 
 app = Flask(__name__)
@@ -145,6 +148,16 @@ def status():
         "today_profit": 0
 
     })
+# ======================================
+# TWELVE DATA LIVE FEED
+# ======================================
+
+@app.route("/market/live", methods=["GET"])
+def live_market():
+
+    data = get_market_data()
+
+    return jsonify(data)
 
 # ======================================
 # LIVE MARKET API
