@@ -1,6 +1,6 @@
 def analyze(candles):
 
-    if len(candles) < 6:
+    if len(candles) < 30:
         return {
             "engine": "Liquidity",
             "signal": "WAIT",
@@ -9,35 +9,40 @@ def analyze(candles):
             "reason": "Not enough candles."
         }
 
-    highs = [c["high"] for c in candles[-6:]]
-    lows = [c["low"] for c in candles[-6:]]
+    highs = [c["high"] for c in candles]
+    lows = [c["low"] for c in candles]
 
-    highest = max(highs)
-    lowest = min(lows)
+    current = candles[-1]
 
-    last = candles[-1]
+    previous_highs = highs[-30:-1]
+    previous_lows = lows[-30:-1]
 
-    buy_sweep = last["high"] >= highest
-    sell_sweep = last["low"] <= lowest
+    liquidity_high = max(previous_highs)
+    liquidity_low = min(previous_lows)
 
-    if buy_sweep:
+    swept_high = current["high"] > liquidity_high
+    swept_low = current["low"] < liquidity_low
+
+    if swept_high and current["close"] < liquidity_high:
         return {
             "engine": "Liquidity",
             "signal": "SELL",
-            "score": 18,
+            "score": 20,
             "confidence": 90,
-           "reason": "Buy-side liquidity sweep detected.",
-           "liquidity": "BUY_SIDE",
+            "reason": "Buy-side liquidity sweep and rejection detected.",
+            "liquidity": "BUY_SIDE_SWEEP",
+            "level": liquidity_high
         }
 
-    if sell_sweep:
+    if swept_low and current["close"] > liquidity_low:
         return {
             "engine": "Liquidity",
             "signal": "BUY",
-            "score": 18,
+            "score": 20,
             "confidence": 90,
-            "reason": "Sell-side liquidity sweep detected.",
-            "liquidity": "SELL_SIDE",
+            "reason": "Sell-side liquidity sweep and rejection detected.",
+            "liquidity": "SELL_SIDE_SWEEP",
+            "level": liquidity_low
         }
 
     return {
@@ -47,4 +52,6 @@ def analyze(candles):
         "confidence": 40,
         "reason": "No liquidity sweep detected.",
         "liquidity": "NONE",
+        "high_level": liquidity_high,
+        "low_level": liquidity_low
     }

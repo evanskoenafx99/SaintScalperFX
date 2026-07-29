@@ -20,7 +20,7 @@ double gridSize;
 input double gridSize_Spacing = 1;
 double LotSize;
 input double totalProfit_inCurrency = 1000;
-input string AI_URL = "http://127.0.0.1:5001/market";
+input string AI_URL = "http://127.0.0.1:8000/market";
 string AI_SIGNAL = "WAIT";
 datetime LastAIRequest = 0;
 
@@ -78,7 +78,7 @@ ArraySetAsSeries(CandleData,true);
 CopyRates(_Symbol,_Period,0,200,CandleData);
 if(TimeCurrent() - LastAIRequest >= 60)
 {
-AI.SendMarketData(
+   AI.SendMarketData(
       _Symbol,
       _Period,
       SymbolInfoDouble(_Symbol,SYMBOL_BID),
@@ -86,7 +86,100 @@ AI.SendMarketData(
       CandleData,
       ArraySize(CandleData)
    );
+
+   AI.FetchCommand();
+string command = AI.GetCommand();
+
+if(command=="CLOSE")
+{
+   ulong ticket = (ulong)AI.GetTicket();
+
+   if(PositionSelectByTicket(ticket))
+   {
+      obj_Trade.PositionClose(ticket);
+      AI.SendConfirmation(
+         "CLOSE",
+         ticket,
+         true
+      );
+   }
+}
+
+
+if(command=="MODIFY_SL")
+{
+   ulong ticket = (ulong)AI.GetTicket();
+
+   double sl = AI.GetStopLoss();
+   double tp = AI.GetTakeProfit();
+
+   if(PositionSelectByTicket(ticket))
+   {
+      if(obj_Trade.PositionModify(ticket,sl,tp))
+      {
+         AI.SendConfirmation(
+            "MODIFY_SL",
+            ticket,
+            true
+         );
+      }
+   }
+}
+
+if(command=="BUY")
+{
+   double lot = AI.GetLotSize();
+
+   double sl = AI.GetStopLoss();
+
+   double tp = AI.GetTakeProfit();
+
+
+   if(obj_Trade.Buy(
+      lot,
+      _Symbol,
+      SymbolInfoDouble(_Symbol,SYMBOL_ASK),
+      sl,
+      tp,
+      "SaintScalperFX COMMAND BUY"
+   ))
+   {
+      AI.SendConfirmation(
+         "BUY",
+         0,
+         true
+      );
+   }
+}
+
+
+if(command=="SELL")
+{
+   double lot = AI.GetLotSize();
+
+   double sl = AI.GetStopLoss();
+
+   double tp = AI.GetTakeProfit();
+
+
+   if(obj_Trade.Sell(
+      lot,
+      _Symbol,
+      SymbolInfoDouble(_Symbol,SYMBOL_BID),
+      sl,
+      tp,
+      "SaintScalperFX COMMAND SELL"
+   ))
+   {
+      AI.SendConfirmation(
+         "SELL",
+         0,
+         true
+      );
+   }
+}
    LastAIRequest = TimeCurrent();
+}
 }
 
       for(int i = PositionsTotal()-1; i >= 0; i--){    

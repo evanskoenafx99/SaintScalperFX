@@ -4,6 +4,7 @@ import importlib
 class MT5Bridge:
 
     def __init__(self):
+
         self.connected = False
         self.account = None
         self.broker = None
@@ -22,9 +23,12 @@ class MT5Bridge:
 
             self.bridge = module.Broker()
 
-            self.connected = self.bridge.connect(credentials)
+            self.connected = self.bridge.connect(
+                credentials
+            )
 
             if self.connected:
+
                 self.account = self.bridge.get_account()
 
             return self.connected
@@ -79,6 +83,15 @@ class MT5Bridge:
         )
 
 
+    def get_positions(self):
+
+        if not self.bridge:
+
+            return []
+
+        return self.bridge.get_positions()
+
+
     def place_order(
         self,
         symbol,
@@ -101,10 +114,98 @@ class MT5Bridge:
         )
 
 
-    def close_trade(self, ticket):
+    def modify_trade(
+        self,
+        ticket,
+        stop_loss=None,
+        take_profit=None
+    ):
 
         if not self.bridge:
 
             return False
 
-        return self.bridge.close_trade(ticket)
+        return self.bridge.modify_trade(
+            ticket,
+            stop_loss,
+            take_profit
+        )
+
+
+    def close_trade(
+        self,
+        ticket
+    ):
+
+        if not self.bridge:
+
+            return False
+
+        return self.bridge.close_trade(
+            ticket
+        )
+
+
+    def execute_with_confirmation(
+        self,
+        action,
+        ticket=None,
+        stop_loss=None,
+        take_profit=None
+    ):
+
+        if action == "HOLD":
+
+            return {
+                "success": True,
+                "action": action,
+                "reason": "No action required"
+            }
+
+
+        if action == "MONITOR":
+
+            return {
+                "success": True,
+                "action": action,
+                "reason": "Monitoring position"
+            }
+
+
+        if action == "PROTECT":
+
+            result = self.modify_trade(
+                ticket,
+                stop_loss,
+                take_profit
+            )
+
+        elif action == "CLOSED":
+
+            result = self.close_trade(
+                ticket
+            )
+
+        else:
+
+            return {
+                "success": False,
+                "action": action,
+                "reason": "Unsupported action"
+            }
+
+
+        if result:
+
+            return {
+                "success": True,
+                "action": action,
+                "reason": "Broker confirmed action"
+            }
+
+
+        return {
+            "success": False,
+            "action": action,
+            "reason": "Broker rejected action"
+        }

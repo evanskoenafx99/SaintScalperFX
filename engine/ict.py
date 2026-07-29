@@ -27,21 +27,34 @@ def analyze(candles):
     reasons = []
 
 
-    # Main ICT bias comes from structure
-
+    # Market structure bias
     if structure.get("signal") == "BUY":
 
-        score += 20
         signal = "BUY"
+        score += 20
         reasons.append("Bullish BOS")
 
 
     elif structure.get("signal") == "SELL":
 
-        score += 20
         signal = "SELL"
+        score += 20
         reasons.append("Bearish BOS")
 
+
+    # If no BOS, use imbalance bias
+    elif fvg.get("signal") == "BUY":
+
+        signal = "BUY"
+        score += 10
+        reasons.append("Bullish FVG")
+
+
+    elif fvg.get("signal") == "SELL":
+
+        signal = "SELL"
+        score += 10
+        reasons.append("Bearish FVG")
 
 
     # Liquidity confirmation
@@ -52,21 +65,12 @@ def analyze(candles):
         reasons.append("Liquidity confirmation")
 
 
-    # Liquidity against structure = warning, not immediate reversal
-
-    elif liquidity.get("signal") != "WAIT":
-
-        reasons.append("Liquidity sweep against bias")
-
-
-
-    # FVG confirmation
+    # Fair Value Gap confirmation
 
     if fvg.get("signal") == signal:
 
         score += 10
         reasons.append("FVG confirmation")
-
 
 
     # Order block confirmation
@@ -77,8 +81,7 @@ def analyze(candles):
         reasons.append("Order block confirmation")
 
 
-
-    # Only reverse if CHoCH exists
+    # CHoCH reversal
 
     if structure.get("choch"):
 
@@ -89,11 +92,10 @@ def analyze(candles):
             reasons.append("CHoCH reversal")
 
 
-
     confidence = min(score * 3, 95)
 
 
-    if score < 20:
+    if score < 10:
 
         signal = "WAIT"
 
@@ -102,22 +104,35 @@ def analyze(candles):
     return {
 
         "engine": "ICT",
+
         "signal": signal,
+
         "score": score,
+
         "confidence": confidence,
 
         "reason": ", ".join(reasons)
         if reasons else "No ICT setup.",
 
+
         "bos": structure.get("bos", False),
+
         "choch": structure.get("choch", False),
 
-      "liquidity": liquidity.get("signal") != "WAIT",
-      "fvg": fvg.get("signal") != "WAIT",
-      "orderblock": orderblock.get("signal") != "WAIT",
 
-      "structure_signal": structure.get("signal"),
-      "liquidity_signal": liquidity.get("signal"),
-      "fvg_signal": fvg.get("signal"),
-      "orderblock_signal": orderblock.get("signal")
+        "liquidity": liquidity.get("signal") != "WAIT",
+
+        "fvg": fvg.get("signal") != "WAIT",
+
+        "orderblock": orderblock.get("signal") != "WAIT",
+
+
+        "structure_signal": structure.get("signal"),
+
+        "liquidity_signal": liquidity.get("signal"),
+
+        "fvg_signal": fvg.get("signal"),
+
+        "orderblock_signal": orderblock.get("signal")
+
     }

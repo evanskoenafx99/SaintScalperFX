@@ -1,6 +1,5 @@
 def analyze(candles):
-
-    if len(candles) < 6:
+    if len(candles) < 20:
         return {
             "engine": "Structure",
             "signal": "WAIT",
@@ -9,97 +8,69 @@ def analyze(candles):
             "reason": "Not enough candles."
         }
 
+    highs = [c["high"] for c in candles]
+    lows = [c["low"] for c in candles]
+    closes = [c["close"] for c in candles]
 
-    highs = [c["high"] for c in candles[-6:]]
-    lows = [c["low"] for c in candles[-6:]]
+    current_close = closes[-1]
 
+    swing_high = max(highs[-20:-1])
+    swing_low = min(lows[-20:-1])
 
-    previous_high = max(highs[:-1])
-    previous_low = min(lows[:-1])
-
-    current = candles[-1]
     hh = highs[-1] > highs[-2]
     hl = lows[-1] > lows[-2]
-
     lh = highs[-1] < highs[-2]
     ll = lows[-1] < lows[-2]
 
-    bullish_bos = current["high"] > previous_high
-    bearish_bos = current["low"] < previous_low
+    bullish_bos = current_close > swing_high
+    bearish_bos = current_close < swing_low
 
+    trend = "RANGING"
+    structure = "Sideways"
+    signal = "WAIT"
+    score = 10
+    confidence = 50
+    reason = "Range market."
 
-    previous_direction = None
+    if bullish_bos:
+        trend = "UPTREND"
+        structure = "Bullish"
+        signal = "BUY"
+        score = 30
+        confidence = 95
+        reason = "Bullish Break of Structure."
 
-    if highs[-2] > highs[-3] and lows[-2] > lows[-3]:
-        previous_direction = "BULLISH"
-
-    elif highs[-2] < highs[-3] and lows[-2] < lows[-3]:
-        previous_direction = "BEARISH"
-
+    elif bearish_bos:
+        trend = "DOWNTREND"
+        structure = "Bearish"
+        signal = "SELL"
+        score = 30
+        confidence = 95
+        reason = "Bearish Break of Structure."
 
     choch = False
 
-
-    if previous_direction == "BULLISH" and bearish_bos:
+    if trend == "UPTREND" and lh:
         choch = True
 
-    if previous_direction == "BEARISH" and bullish_bos:
+    if trend == "DOWNTREND" and hl:
         choch = True
-
-
-
-    if bullish_bos:
-
-        return {
-            "engine": "Structure",
-            "signal": "BUY",
-            "score": 25,
-            "confidence": 95,
-            "reason": "Bullish BOS detected.",
-            "structure": "Bullish",
-            "bos": True,
-            "choch": choch,
-            "trend": "UPTREND",
-            "hh": hh,
-            "hl": hl,
-            "lh": lh,
-            "ll": ll,
-        }
-
-
-
-    if bearish_bos:
-
-        return {
-            "engine": "Structure",
-            "signal": "SELL",
-            "score": 25,
-            "confidence": 95,
-            "reason": "Bearish BOS detected.",
-            "structure": "Bearish",
-            "bos": True,
-            "choch": choch,
-            "trend": "DOWNTREND",
-            "hh": hh,
-            "hl": hl,
-            "lh": lh,
-            "ll": ll,
-        }
-
-
 
     return {
         "engine": "Structure",
-        "signal": "WAIT",
-        "score": 10,
-        "confidence": 50,
-        "reason": "No BOS or CHoCH detected.",
-        "structure": "Sideways",
-        "bos": False,
-        "choch": False,
-        "trend": "RANGING",
+        "signal": signal,
+        "score": score,
+        "confidence": confidence,
+        "reason": reason,
+        "structure": structure,
+        "trend": trend,
+        "bos": signal != "WAIT",
+        "choch": choch,
         "hh": hh,
         "hl": hl,
         "lh": lh,
         "ll": ll,
+        "swing_high": swing_high,
+        "swing_low": swing_low,
+        "current_close": current_close
     }
