@@ -7,9 +7,9 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 from flask import Flask, request, jsonify
-
 from engine.ai import SaintScalperBrain
 from engine.price_risk import calculate
+from engine.market_adapter import market_adapter
 
 app = Flask(__name__)
 
@@ -21,6 +21,13 @@ latest_market_data = {
     "bid": 0,
     "ask": 0,
     "candles": []
+}
+
+latest_account_data = {
+    "balance": 0,
+    "equity": 0,
+    "open_trades": 0,
+    "today_profit": 0
 }
 
 pending_command = {
@@ -38,7 +45,7 @@ latest_confidence = 0
 latest_analysis = {}
 
 # =========================
-# MARKET DATA FROM EA
+# MARKET DATA
 # =========================
 
 @app.route("/market", methods=["POST"])
@@ -54,19 +61,12 @@ def receive_market():
 
     latest_market_data = data
 
-    # Forward market data to the cloud server
-    try:
-        requests.post(
-            "http://127.0.0.1:8000/market",
-            json=data,
-            timeout=2
-        )
-    except Exception as e:
-        print("Cloud sync failed:", e)
+    market_adapter.from_twelvedata(data)
 
     candles = data.get("candles", [])
 
     analysis = brain.analyze(candles)
+
     latest_analysis = analysis
 
     risk = calculate(
@@ -108,15 +108,9 @@ def receive_market():
     })
 
 
-# =========================
-# MARKET VIEW
-# =========================
-
 @app.route("/market", methods=["GET"])
 def get_market():
     return jsonify(latest_market_data)
-
-
 # =========================
 # COMMAND CHANNEL
 # =========================
@@ -178,6 +172,33 @@ def get_confirmation():
 
 
 # =========================
+# ACCOUNT UPDATE FROM MT5
+# =========================
+
+@app.route("/account", methods=["POST"])
+def receive_account():
+
+    global latest_account_data
+
+    data = request.get_json(force=True) or {}
+
+    latest_account_data = {
+        "balance": data.get("balance", 0),
+        "equity": data.get("equity", 0),
+        "open_trades": data.get("open_trades", 0),
+        "today_profit": data.get("today_profit", 0)
+    }
+
+    return jsonify({
+        "status": "received",
+        "account": latest_account_data
+    })
+
+
+@app.route("/account", methods=["GET"])
+def get_account():
+    return jsonify(latest_account_data)
+# =========================
 # APP STATUS
 # =========================
 
@@ -195,10 +216,19 @@ def get_status():
         "analysis": latest_analysis,
         "symbol": latest_market_data.get("symbol", ""),
         "timeframe": latest_market_data.get("timeframe", ""),
-        "balance": 0,
-        "equity": 0,
-        "open_trades": 0,
-        "today_profit": 0
+        "balance": latest_account_data["balance"],
+        "equity": latest_account_data["equity"],
+        "open_trades": latest_account_data["open_trades"],
+        "today_profit": latest_account_data["today_profit"]
+    })
+
+
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({
+        "project": "SaintScalperFX",
+        "service": "SaintBridge",
+        "status": "ONLINE"
     })
 
 

@@ -2,6 +2,9 @@ import sys
 import os
 import requests
 import sqlite3
+import threading
+from execution_monitor import monitor
+from engine.ai_memory import ai_memory
 
 from flask import Flask, request, jsonify
 
@@ -20,12 +23,29 @@ sys.path.append(
 
 from engine.ai import SaintScalperBrain
 from engine.price_risk import calculate
-from market_feed import get_market_data
 
 
 app = Flask(__name__)
 
 BRIDGE_URL = os.getenv("BRIDGE_URL", "http://127.0.0.1:5001")
+
+def get_bridge_account():
+    # Mobile/cloud mode: no MT5 bridge required.
+    # Keep account values at zero until a live broker connector is available.
+    return {
+        "balance": 0,
+        "equity": 0,
+        "open_trades": 0,
+        "today_profit": 0
+    }
+
+def get_bridge_market():
+    # Mobile/cloud mode:
+    # Market data is supplied directly through POST /market.
+    if latest_market_data.get("candles"):
+        return latest_market_data
+
+    return None
 
 DATABASE = "users.db"
 
@@ -109,45 +129,37 @@ def home():
 
     })
 
-
+def refresh_ai():
+    # Mobile/cloud mode.
+    # /market already receives the live candles and runs the AI.
+    # Do not query the MT5 bridge here.
+    return latest_analysis
 
 @app.route("/status")
 def status():
 
+    refresh_ai()
+
+    account = get_bridge_account()
+
     return jsonify({
-
         "cloud": "ONLINE",
-
         "ai": "READY",
-
         "worker": "RUNNING",
-
         "broker": "CONNECTED",
-
         "signal": latest_signal,
-
         "confidence": latest_confidence,
-
-        "decision":
-            "TRADE" if latest_signal != "WAIT" else "WAIT",
-
+        "decision": "TRADE" if latest_signal != "WAIT" else "WAIT",
         "analysis": latest_analysis,
-
-        "symbol":
-            latest_market_data.get("symbol", ""),
-
-        "timeframe":
-            latest_market_data.get("timeframe", ""),
-
-        "balance": 0,
-
-        "equity": 0,
-
-        "open_trades": 0,
-
-        "today_profit": 0
-
+        "symbol": latest_market_data.get("symbol", ""),
+        "timeframe": latest_market_data.get("timeframe", ""),
+        "balance": account["balance"],
+        "equity": account["equity"],
+        "open_trades": account["open_trades"],
+        "today_profit": account["today_profit"]
     })
+
+
 # ======================================
 # TWELVE DATA LIVE FEED
 # ======================================
@@ -155,10 +167,44 @@ def status():
 @app.route("/market/live", methods=["GET"])
 def live_market():
 
-    data = get_market_data()
+    market = latest_market_data
+    account = get_bridge_account()
 
-    return jsonify(data)
+    return jsonify({
 
+        "symbol": market.get("symbol", ""),
+
+        "timeframe": market.get("timeframe", ""),
+
+        "bid": market.get("bid", 0),
+
+        "ask": market.get("ask", 0),
+
+        "candles": market.get("candles", []),
+
+        "signal": latest_signal,
+
+        "confidence": latest_confidence,
+
+        "decision": "TRADE" if latest_signal != "WAIT" else "WAIT",
+
+        "analysis": latest_analysis,
+
+        "broker": "CONNECTED",
+
+        "cloud": "ONLINE",
+
+        "ai": "READY",
+
+        "balance": account["balance"],
+
+        "equity": account["equity"],
+
+        "open_trades": account["open_trades"],
+
+        "today_profit": account["today_profit"]
+
+    })
 # ======================================
 # LIVE MARKET API
 # ======================================
@@ -195,13 +241,13 @@ def receive_market():
     latest_signal = signal
     latest_confidence = confidence
 
+    # SIGNAL-ONLY MODE
+    # The AI may generate BUY/SELL signals,
+    # but no automatic execution command is created.
     command = "NONE"
 
-    if signal != "WAIT" and confidence >= 70:
-        command = signal
-
     pending_command = {
-        "command": command,
+        "command": "NONE",
         "ticket": 0,
         "lot_size": risk.get("lot_size", 0.02),
         "stop_loss": risk.get("stop_loss", 0),
@@ -379,6 +425,116 @@ def login():
     }),401
 
 
+# ======================================
+# PUSH NOTIFICATIONS
+# ======================================
+
+def init_push_tokens_table():
+    conn = get_db()
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS push_tokens (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            expo_push_token TEXT NOT NULL UNIQUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    """)
+
+    conn.commit()
+    conn.close()
+
+
+init_push_tokens_table()
+
+
+@app.route("/notifications/register", methods=["POST"])
+def register_push_token():
+    try:
+        data = request.get_json(force=True) or {}
+
+        user_id = data.get("user_id")
+        expo_push_token = data.get("expo_push_token")
+
+        if not user_id or not expo_push_token:
+            return jsonify({
+                "status": "error",
+                "message": "user_id and expo_push_token are required"
+            }), 400
+
+        conn = get_db()
+
+        # Verify that the user actually exists.
+        user = conn.execute(
+            "SELECT id FROM users WHERE id=?",
+            (user_id,)
+        ).fetchone()
+
+        if not user:
+            conn.close()
+
+            return jsonify({
+                "status": "error",
+                "message": "User not found"
+            }), 404
+
+        # Update the existing token if it already exists.
+        existing = conn.execute(
+            """
+            SELECT id FROM push_tokens
+            WHERE expo_push_token=?
+            """,
+            (expo_push_token,)
+        ).fetchone()
+
+        if existing:
+
+            conn.execute(
+                """
+                UPDATE push_tokens
+                SET user_id=?,
+                    updated_at=CURRENT_TIMESTAMP
+                WHERE expo_push_token=?
+                """,
+                (user_id, expo_push_token)
+            )
+
+        else:
+
+            conn.execute(
+                """
+                INSERT INTO push_tokens
+                (user_id, expo_push_token)
+                VALUES (?,?)
+                """,
+                (user_id, expo_push_token)
+            )
+
+        conn.commit()
+        conn.close()
+
+        print(
+            f"PUSH TOKEN REGISTERED: user={user_id}"
+        )
+
+        return jsonify({
+            "status": "success",
+            "message": "Push token registered"
+        })
+
+    except Exception as e:
+
+        print(
+            "PUSH TOKEN REGISTRATION ERROR:",
+            e
+        )
+
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 
 @app.route("/ai/analyze", methods=["POST"])
@@ -1159,11 +1315,334 @@ def execution_process():
 
         }),500
 
+@app.route("/ai")
+def ai_status():
+
+    refresh_ai()
+
+    return jsonify({
+
+        "ai": "ONLINE",
+
+        "symbol": latest_market_data.get("symbol",""),
+
+        "timeframe": latest_market_data.get("timeframe",""),
+
+        "price": latest_market_data.get("bid",0),
+
+        "signal": latest_signal,
+
+        "confidence": latest_confidence,
+
+        "analysis": latest_analysis
+
+    })
+# ======================================
+# SAINT MOBILE TRADE CONTROL
+# ======================================
+
+@app.route("/execution/approve/<int:trade_id>", methods=["POST"])
+def approve_trade(trade_id):
+
+    import sqlite3
+
+    conn = sqlite3.connect("users.db")
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    UPDATE execution_queue
+    SET status='APPROVED'
+    WHERE id=? AND status='READY'
+    """,
+    (trade_id,))
+
+    conn.commit()
+
+    conn.close()
+
+    return jsonify({
+        "status":"success",
+        "message":"Trade approved",
+        "trade_id":trade_id
+    })
+
+
+@app.route("/execution/reject/<int:trade_id>", methods=["POST"])
+def reject_trade(trade_id):
+
+    import sqlite3
+
+    conn = sqlite3.connect("users.db")
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    UPDATE execution_queue
+    SET status='REJECTED'
+    WHERE id=? AND status='READY'
+    """,
+    (trade_id,))
+
+    conn.commit()
+
+    conn.close()
+
+    return jsonify({
+        "status":"success",
+        "message":"Trade rejected",
+        "trade_id":trade_id
+    })
+# ======================================
+# SAINT OPEN TRADE CONTROL
+# ======================================
+
+@app.route("/execution/open/<int:trade_id>", methods=["POST"])
+def open_trade(trade_id):
+
+    import sqlite3
+    from datetime import datetime
+
+    conn = sqlite3.connect("users.db")
+    conn.row_factory = sqlite3.Row
+
+    cursor = conn.cursor()
+
+
+    cursor.execute("""
+    SELECT *
+    FROM execution_queue
+    WHERE id=? AND status='APPROVED'
+    """,
+    (trade_id,))
+
+
+    order = cursor.fetchone()
+
+
+    if not order:
+        conn.close()
+
+        return jsonify({
+            "status":"error",
+            "message":"Trade not found or not approved"
+        }),400
+
+
+    cursor.execute("""
+    UPDATE execution_queue
+    SET status='OPENED'
+    WHERE id=?
+    """,
+    (trade_id,))
+
+
+    cursor.execute("""
+    INSERT INTO trades
+    (
+        user_id,
+        symbol,
+        direction,
+        entry,
+        exit,
+        profit,
+        status,
+        stop_loss,
+        take_profit,
+        created_at
+    )
+
+    VALUES (?,?,?,?,?,?,?,?,?,?)
+
+    """,
+    (
+        order["user_id"],
+        order["symbol"].replace("/",""),
+        order["direction"],
+        order["entry"],
+        None,
+        "0",
+        "OPEN",
+        order["stop_loss"],
+        order["take_profit"],
+        datetime.now()
+    ))
+
+
+    new_trade_id = cursor.lastrowid
+
+
+
+
+    conn.commit()
+    conn.close()
+
+
+    return jsonify({
+
+        "status":"success",
+
+        "message":"Trade opened and added to lifecycle",
+
+        "execution_id":trade_id,
+
+        "trade_id":new_trade_id,
+
+        "direction":order["direction"]
+
+    })
+@app.route("/execution/monitor", methods=["POST"])
+def execution_monitor():
+
+    global latest_market_data
+
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    refresh_ai()
+
+    market = latest_market_data
+
+    current_price = market.get("bid", 0)
+
+    if current_price == 0:
+        conn.close()
+        return jsonify({
+            "status":"error",
+            "message":"No market price available"
+        }),400
+
+
+    cursor.execute("""
+    SELECT *
+    FROM trades
+    WHERE status='OPEN'
+    """)
+
+    trades = cursor.fetchall()
+
+    closed = []
+
+
+    for trade in trades:
+
+        entry = float(trade["entry"])
+
+        stop_loss = trade["stop_loss"]
+        take_profit = trade["take_profit"]
+
+
+        if not stop_loss or not take_profit:
+            continue
+
+
+        stop_loss = float(stop_loss)
+        take_profit = float(take_profit)
+
+
+        close_reason = None
+
+
+        if trade["direction"] == "BUY":
+
+            if current_price >= take_profit:
+                close_reason = "TAKE_PROFIT"
+
+            elif current_price <= stop_loss:
+                close_reason = "STOP_LOSS"
+
+
+        elif trade["direction"] == "SELL":
+
+            if current_price <= take_profit:
+                close_reason = "TAKE_PROFIT"
+
+            elif current_price >= stop_loss:
+                close_reason = "STOP_LOSS"
+
+
+
+        if close_reason:
+
+
+            if trade["direction"] == "BUY":
+                profit = current_price - entry
+            else:
+                profit = entry - current_price
+
+
+            cursor.execute("""
+            UPDATE trades
+            SET
+                exit=?,
+                profit=?,
+                status='CLOSED',
+                close_reason=?,
+                current_price=?
+            WHERE id=?
+            """,
+            (
+                current_price,
+                str(round(profit,5)),
+                close_reason,
+                current_price,
+                trade["id"]
+            ))
+
+            ai_memory.save_trade({
+
+                "symbol": latest_market_data.get("symbol",""),
+
+                "signal": trade["direction"],
+
+                "confidence": latest_confidence,
+
+                "session": latest_analysis.get("session",""),
+
+                "trend": latest_analysis.get("trend",""),
+
+                "liquidity": latest_analysis.get("liquidity",False),
+
+                "fvg": latest_analysis.get("fvg",False),
+
+                "orderblock": latest_analysis.get("orderblock",False),
+
+                "entry": entry,
+
+                "exit": current_price,
+
+                "profit": profit,
+
+                "result": "WIN" if profit > 0 else "LOSS"
+
+            })
+
+            closed.append({
+                "trade_id":trade["id"],
+                "reason":close_reason,
+                "profit":round(profit,5)
+            })
+
+
+    conn.commit()
+    conn.close()
+
+
+    return jsonify({
+        "status":"success",
+        "price":current_price,
+        "closed":closed
+    })
+
 if __name__ == "__main__":
 
-    app.run(
+    threading.Thread(
+        target=monitor,
+        daemon=True
+    ).start()
 
+    app.run(
         host="0.0.0.0",
         port=8000
-
     )

@@ -27,38 +27,69 @@ class SaintScalperBrain:
             risk(candles)
         ]
 
+
         buy_score = 0
         sell_score = 0
+        confirmations = 0
 
 
         for e in engines:
 
-            signal = e.get("signal","WAIT")
-            score = e.get("score",0)
+            signal = e.get("signal", "WAIT")
+            score = e.get("score", 0)
+
 
             if signal == "BUY":
                 buy_score += score
+                confirmations += 1
 
-            if signal == "SELL":
+
+            elif signal == "SELL":
                 sell_score += score
+                confirmations += 1
+
+
+
+        confidence = max(
+            buy_score,
+            sell_score
+        )
+
+
+        if confirmations >= 2:
+            confidence += 15
+
+        if confirmations >= 3:
+            confidence += 10
+
+        if confirmations >= 4:
+            confidence += 10
+
+
+        confidence = min(confidence,100)
 
 
         signal = "WAIT"
 
 
-        # New SaintScalperFX decision logic
+        if buy_score > sell_score:
 
-        if buy_score >= 25 and buy_score > sell_score:
-            signal = "BUY"
+            if confidence >= 50:
+                signal = "BUY"
 
-        elif sell_score >= 25 and sell_score > buy_score:
-            signal = "SELL"
+            elif confidence >= 20:
+                signal = "WATCH BUY"
 
 
-        confidence = min(
-            max(buy_score, sell_score),
-            100
-        )
+
+        elif sell_score > buy_score:
+
+            if confidence >= 50:
+                signal = "SELL"
+
+            elif confidence >= 20:
+                signal = "WATCH SELL"
+
 
 
         return {
@@ -71,5 +102,8 @@ class SaintScalperBrain:
 
             "sell_score": sell_score,
 
+            "confirmations": confirmations,
+
             "engines": engines
+
         }

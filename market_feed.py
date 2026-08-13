@@ -1,25 +1,23 @@
-import os
 import requests
+import time
 
-
-TWELVE_API_KEY = os.getenv("TWELVE_API_KEY", "")
+TWELVE_API_KEY = "3fe85ef54ad5432e8361353bf1511a12"
 
 SYMBOL = "XAU/USD"
 INTERVAL = "15min"
 
+_last_market = {
+    "symbol": SYMBOL,
+    "timeframe": INTERVAL,
+    "bid": 0,
+    "ask": 0,
+    "candles": []
+}
+
 
 def get_market_data():
 
-    if not TWELVE_API_KEY:
-        return {
-            "symbol": SYMBOL,
-            "timeframe": INTERVAL,
-            "bid": 0,
-            "ask": 0,
-            "candles": [],
-            "error": "Missing Twelve Data API key"
-        }
-
+    global _last_market
 
     url = "https://api.twelvedata.com/time_series"
 
@@ -30,43 +28,59 @@ def get_market_data():
         "apikey": TWELVE_API_KEY
     }
 
+    for _ in range(3):
 
-    try:
-        response = requests.get(
-            url,
-            params=params,
-            timeout=10
-        )
+        try:
 
-        data = response.json()
+            response = requests.get(
+                url,
+                params=params,
+                timeout=10
+            )
 
-        candles = []
+            response.raise_for_status()
 
-        for candle in data.get("values", []):
-            candles.append({
-                "open": float(candle["open"]),
-                "high": float(candle["high"]),
-                "low": float(candle["low"]),
-                "close": float(candle["close"])
-            })
+            data = response.json()
 
+            if "status" in data and data["status"] == "error":
+                print("Twelve Data error:", data.get("message"))
+                return _last_market
 
-        return {
-            "symbol": SYMBOL,
-            "timeframe": INTERVAL,
-            "bid": candles[-1]["close"] if candles else 0,
-            "ask": candles[-1]["close"] if candles else 0,
-            "candles": candles
-        }
+            values = data.get("values", [])
 
+            if values:
 
-    except Exception as e:
+                candles = []
 
-        return {
-            "symbol": SYMBOL,
-            "timeframe": INTERVAL,
-            "bid": 0,
-            "ask": 0,
-            "candles": [],
-            "error": str(e)
-        }
+                for candle in values:
+
+                    candles.append({
+                        "open": float(candle["open"]),
+                        "high": float(candle["high"]),
+                        "low": float(candle["low"]),
+                        "close": float(candle["close"])
+                    })
+
+                # Twelve Data returns newest -> oldest.
+                # AI analysis should receive oldest -> newest.
+                candles.reverse()
+
+                latest_price = candles[-1]["close"]
+
+                _last_market = {
+                    "symbol": SYMBOL,
+                    "timeframe": INTERVAL,
+                    "bid": latest_price,
+                    "ask": latest_price,
+                    "candles": candles
+                }
+
+                return _last_market
+
+        except Exception as e:
+
+            print("Twelve Data connection error:", e)
+
+        time.sleep(1)
+
+    return _last_market
