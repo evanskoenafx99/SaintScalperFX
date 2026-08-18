@@ -3,6 +3,15 @@ import os
 import requests
 import sqlite3
 import threading
+
+sys.path.append(
+    os.path.dirname(
+        os.path.dirname(
+            os.path.abspath(__file__)
+        )
+    )
+)
+
 from execution_monitor import monitor
 from engine.ai_memory import ai_memory
 
@@ -11,14 +20,6 @@ from flask import Flask, request, jsonify
 from werkzeug.security import (
     generate_password_hash,
     check_password_hash
-)
-
-sys.path.append(
-    os.path.dirname(
-        os.path.dirname(
-            os.path.abspath(__file__)
-        )
-    )
 )
 
 from engine.ai import SaintScalperBrain
@@ -149,7 +150,7 @@ def status():
         "broker": "CONNECTED",
         "signal": latest_signal,
         "confidence": latest_confidence,
-        "decision": "TRADE" if latest_signal != "WAIT" else "WAIT",
+        "decision": "TRADE" if latest_signal in ["BUY", "SELL"] and latest_confidence >= 80 else "WAIT",
         "analysis": latest_analysis,
         "symbol": latest_market_data.get("symbol", ""),
         "timeframe": latest_market_data.get("timeframe", ""),
@@ -186,7 +187,7 @@ def live_market():
 
         "confidence": latest_confidence,
 
-        "decision": "TRADE" if latest_signal != "WAIT" else "WAIT",
+        "decision": "TRADE" if latest_signal in ["BUY", "SELL"] and latest_confidence >= 80 else "WAIT",
 
         "analysis": latest_analysis,
 
@@ -220,11 +221,50 @@ def receive_market():
 
     data = request.get_json(force=True) or {}
 
+    # ==================================================
+    # SAINT ULTRA MULTI-TIMEFRAME MARKET DATA
+    #
+    # H1  = higher-timeframe directional bias
+    # M15 = active ICT/SMC setup timeframe
+    # M5  = entry confirmation timeframe
+    #
+    # M15 remains the legacy "candles" field.
+    # ==================================================
+
+    timeframes = data.get("timeframes", {})
+
+    m5_candles = timeframes.get("M5", [])
+    m15_candles = timeframes.get("M15", [])
+    h1_candles = timeframes.get("H1", [])
+
+    if not m15_candles:
+        m15_candles = data.get("candles", [])
+
     latest_market_data = data
 
-    candles = data.get("candles", [])
+    latest_market_data["timeframes"] = {
+        "M5": m5_candles,
+        "M15": m15_candles,
+        "H1": h1_candles
+    }
 
-    analysis = brain.analyze(candles)
+    candles = m15_candles
+
+    print(
+        "MTF MARKET:",
+        "M5 =", len(m5_candles),
+        "M15 =", len(m15_candles),
+        "H1 =", len(h1_candles)
+    )
+
+    analysis = brain.analyze(
+        candles,
+        timeframes={
+            "M5": m5_candles,
+            "M15": m15_candles,
+            "H1": h1_candles
+        }
+    )
 
     latest_analysis = analysis
 
@@ -254,14 +294,64 @@ def receive_market():
         "take_profit": risk.get("take_profit", 0)
     }
 
+    # ==================================================
+    # SAINT ULTRA SIGNAL-ONLY RESPONSE
+    #
+    # No execution controls are exposed here.
+    # The mobile app receives market intelligence only.
+    # ==================================================
+
     return jsonify({
-        "decision": "TRADE" if command != "NONE" else "WAIT",
-        "command": command,
+        "decision": "SIGNAL" if signal in ["BUY", "SELL"] else "WAIT",
+
         "signal": signal,
         "confidence": confidence,
-        "lot_size": pending_command["lot_size"],
-        "stop_loss": pending_command["stop_loss"],
-        "take_profit": pending_command["take_profit"],
+
+        "bias": analysis.get("bias", "NEUTRAL"),
+        "state": analysis.get("state", "WAIT"),
+        "reason": analysis.get("reason", ""),
+
+        "multi_timeframe": analysis.get(
+            "multi_timeframe",
+            {}
+        ),
+
+        "structure_context": analysis.get(
+            "structure_context",
+            {}
+        ),
+
+        "liquidity": {
+            "event": analysis.get(
+                "liquidity_event",
+                False
+            ),
+            "type": analysis.get(
+                "liquidity_type",
+                "NONE"
+            )
+        },
+
+        "zone": analysis.get(
+            "zone",
+            {}
+        ),
+
+        "entry_confirmation": analysis.get(
+            "entry_confirmation",
+            {}
+        ),
+
+        "risk": analysis.get(
+            "risk",
+            {}
+        ),
+
+        "intelligence": analysis.get(
+            "intelligence",
+            {}
+        ),
+
         "analysis": analysis
     })
 
@@ -544,47 +634,66 @@ def ai_analyze():
 
         from engine.ai import SaintScalperBrain
         from engine.pattern_detector import analyze as pattern_analyze
-        from engine.confidence_filter import evaluate_confidence
+        from engine.confidence import calculate
         from engine.signal_filter import validate_signal
         from engine.trade_plan import generate_trade_plan
 
 
 
-        data = request.json
+        data = request.json or {}
 
-        candles = data.get("candles")
+        # ==================================================
+        # SAINT ULTRA MULTI-TIMEFRAME INPUT
+        # H1  = directional bias
+        # M15 = institutional setup
+        # M5  = entry confirmation
+        # ==================================================
 
+        timeframes = data.get("timeframes", {})
 
-        if not candles:
+        h1_candles = timeframes.get("H1", [])
+        m15_candles = timeframes.get("M15", [])
+        m5_candles = timeframes.get("M5", [])
 
+        # Legacy compatibility
+        if not m15_candles:
+            m15_candles = data.get("candles", [])
+
+        if not m15_candles:
             return jsonify({
+                "error": "No candle data received"
+            }), 400
 
-                "error":"No candle data received"
-
-            }),400
-
-
-
-        candles = prepare_candles(candles)
-
-
+        h1_candles = prepare_candles(h1_candles)
+        m15_candles = prepare_candles(m15_candles)
+        m5_candles = prepare_candles(m5_candles)
 
         brain = SaintScalperBrain()
 
-
-        result = brain.analyze(candles)
-
-
-
-        pattern = pattern_analyze(candles)
-
-
-
-        confidence = evaluate_confidence(
-
-            result["confidence"]
-
+        result = brain.analyze(
+            m15_candles,
+            timeframes={
+                "H1": h1_candles,
+                "M15": m15_candles,
+                "M5": m5_candles
+            }
         )
+
+
+        pattern = pattern_analyze(m15_candles)
+
+
+
+        confidence = calculate(
+            result["engines"]
+        )
+
+        if confidence["grade"] in ["A", "A+"]:
+            confidence_status = "APPROVED"
+        elif confidence["grade"] == "B":
+            confidence_status = "CAUTION"
+        else:
+            confidence_status = "WAIT"
 
 
 
@@ -593,7 +702,7 @@ def ai_analyze():
             result["signal"],
             pattern["pattern"],
             pattern["momentum"],
-            confidence["status"],
+            confidence_status,
             result["engines"]
 
         )
@@ -613,20 +722,70 @@ def ai_analyze():
 
 
         return jsonify({
+            "status": "success",
+            "analysis": {
 
-            "status":"success",
+                # ==============================================
+                # SAINT ULTRA FINAL SIGNAL
+                # ==============================================
+                "signal": final["signal"],
+                "confidence": confidence["confidence"],
+                "grade": confidence["grade"],
+                "reason": final["reason"],
 
-            "analysis":{
+                # ==============================================
+                # INSTITUTIONAL MARKET CONTEXT
+                # ==============================================
+                "bias": result.get("bias", "NEUTRAL"),
+                "state": result.get("state", "WAIT"),
 
-                "signal":final["signal"],
-                "confidence":result["confidence"],
-                "grade":confidence["grade"],
-                "reason":final["reason"],
-                "pattern":pattern,
-                "trade_plan":trade_plan
+                "multi_timeframe": result.get(
+                    "multi_timeframe",
+                    {}
+                ),
 
+                "structure_context": result.get(
+                    "structure_context",
+                    {}
+                ),
+
+                "liquidity": {
+                    "event": result.get(
+                        "liquidity_event",
+                        False
+                    ),
+                    "type": result.get(
+                        "liquidity_type",
+                        "NONE"
+                    )
+                },
+
+                "zone": result.get(
+                    "zone",
+                    {}
+                ),
+
+                "entry_confirmation": result.get(
+                    "entry_confirmation",
+                    {}
+                ),
+
+                "risk": result.get(
+                    "risk",
+                    {}
+                ),
+
+                "intelligence": result.get(
+                    "intelligence",
+                    {}
+                ),
+
+                # ==============================================
+                # LEGACY COMPATIBILITY
+                # ==============================================
+                "pattern": pattern,
+                "trade_plan": trade_plan
             }
-
         })
 
 
