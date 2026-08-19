@@ -123,19 +123,34 @@ export function startMarketSync() {
 
       const takeProfit = validNumber(rawTakeProfit, 0);
 
-      const risk = getRisk(confidence);
+      // BUY/SELL signals require a complete trade plan.
+      // Never display a directional signal when SL or TP is missing.
+      const hasCompleteTradePlan =
+        entry > 0 &&
+        stopLoss > 0 &&
+        takeProfit > 0;
+
+      const validatedSignal =
+        (signal === "BUY" || signal === "SELL") && hasCompleteTradePlan
+          ? signal
+          : "WAIT";
+
+      const validatedConfidence =
+        validatedSignal === signal ? confidence : 0;
+
+      const risk = getRisk(validatedConfidence);
 
       const symbol = market.symbol || "XAU/USD";
 
       const analysisKey =
-        `${signal}:${confidence}:${grade}:${reason}`;
+        `${validatedSignal}:${validatedConfidence}:${grade}:${reason}`;
 
       updateLiveData({
         internetStatus: "ONLINE",
         liveFeedStatus: "ONLINE",
         aiStatus: "ONLINE",
 
-        aiConfidence: confidence,
+        aiConfidence: validatedConfidence,
         aiGrade: grade,
         aiReason: reason,
         aiPattern: pattern,
@@ -146,7 +161,7 @@ export function startMarketSync() {
 
         currentSignal: {
           symbol,
-          direction: signal,
+          direction: validatedSignal,
           entry,
           stopLoss,
           takeProfit,
@@ -180,13 +195,13 @@ export function startMarketSync() {
         confidence >= 70
       ) {
         const signalKey =
-          `${signal}:${symbol}:${confidence}`;
+          `${validatedSignal}:${symbol}:${validatedConfidence}`;
 
         if (signalKey !== lastSignalKey) {
           lastSignalKey = signalKey;
 
           const message =
-            `${signal} ${symbol} (${confidence}% confidence)`;
+            `${validatedSignal} ${symbol} (${validatedConfidence}% confidence)`;
 
           addNotification(message);
 
