@@ -651,14 +651,14 @@ def ai_analyze():
             result.get("signal", "WAIT")
         ).upper()
 
-        final_signal = (
+        candidate_signal = (
             brain_signal
             if brain_signal in ("BUY", "SELL")
             else "WAIT"
         )
 
         trade_plan = generate_trade_plan(
-            final_signal,
+            candidate_signal,
             result,
             price=(
                 m5_candles[-1].get("close", 0)
@@ -666,6 +666,74 @@ def ai_analyze():
                 else 0
             )
         )
+
+        # ==================================================
+        # STRUCTURAL TRADE GATE
+        #
+        # A directional brain signal is only a CANDIDATE.
+        #
+        # The final public signal requires:
+        #   SL
+        #   TP
+        #   valid geometry
+        #   acceptable RR
+        #
+        # Otherwise the final signal is WAIT.
+        # ==================================================
+
+        trade_valid = (
+            trade_plan.get("trade_valid") is True
+        )
+
+        # ==================================================
+        # FINAL SIGNAL AUTHORITY
+        #
+        # Brain direction is only a candidate.
+        # The structural trade plan decides whether
+        # BUY/SELL can become the public signal.
+        # ==================================================
+
+        final_signal = (
+            candidate_signal
+            if trade_valid
+            else "WAIT"
+        )
+
+        if final_signal == "WAIT":
+            trade_plan["signal"] = "WAIT"
+
+        # ==================================================
+        # FINAL CONFIDENCE → GRADE
+        #
+        # Grade is ALWAYS derived from final confidence.
+        # Invalid trade plans cannot publish confidence.
+        # ==================================================
+
+        try:
+            final_confidence = float(
+                result.get("confidence", 0)
+            )
+        except (TypeError, ValueError):
+            final_confidence = 0
+
+        if not trade_valid:
+            final_confidence = 0
+
+        final_confidence = max(
+            0,
+            min(100, round(final_confidence))
+        )
+
+        if final_confidence >= 90:
+            final_grade = "A+"
+        elif final_confidence >= 80:
+            final_grade = "A"
+        elif final_confidence >= 70:
+            final_grade = "B"
+        elif final_confidence >= 60:
+            final_grade = "C"
+        else:
+            final_grade = "D"
 
         return jsonify({
             "status": "success",
@@ -675,9 +743,13 @@ def ai_analyze():
                 # SAINT ULTRA FINAL SIGNAL
                 # ==============================================
                 "signal": final_signal,
-                "confidence": result.get("confidence", 0),
-                "grade": result.get("grade", "D"),
-                "reason": result.get("reason", ""),
+                "confidence": final_confidence,
+                "grade": final_grade,
+                "reason": (
+                    trade_plan.get("reason", "")
+                    if not trade_valid
+                    else result.get("reason", "")
+                ),
 
                 # ==============================================
                 # INSTITUTIONAL MARKET CONTEXT
